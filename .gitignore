@@ -1,0 +1,10 @@
+# Belt-and-suspenders on top of backend/.gitignore and mobile/.gitignore —
+# never commit env files or secrets, from any directory in this repo.
+.env
+.env.*
+!*.env.example
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/

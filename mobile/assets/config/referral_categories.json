@@ -1,0 +1,40 @@
+{
+  "_comment": "Explicit, editable referral rules. Mirrored in mobile/assets/config/referral_categories.json for offline on-device keyword flagging — keep both copies in sync (a shared config endpoint is a next step, not built for this demo).",
+  "categories": [
+    {
+      "id": "repeat_case",
+      "label": "Repeat / recurring dispute",
+      "reason": "This looks like a repeat of a dispute between the same parties. Mediation may not be resolving the underlying issue.",
+      "suggestedNextStep": "Check prior case records for these parties and consider escalating to a formal forum if this is the second or third mediation attempt.",
+      "keywords": ["again", "same dispute", "returned", "previous mediation", "already mediated", "repeat", "keeps happening", "several times", "third time", "second time"]
+    },
+    {
+      "id": "escalating_violence",
+      "label": "Escalating conflict or violence",
+      "reason": "The description mentions threats, violence, or physical harm, which is outside the scope of informal mediation.",
+      "suggestedNextStep": "Refer to the local chief's office or police (Kenya) / relevant law enforcement (Nigeria) before any further mediation session.",
+      "keywords": ["threatened", "threat", "assault", "attacked", "beaten", "injury", "injured", "weapon", "panga", "machete", "violence", "violent", "fight broke out", "burned", "arson", "killed", "death threat"]
+    },
+    {
+      "id": "land_title_dispute",
+      "label": "Formal land title / ownership dispute",
+      "reason": "This involves a registered land title or formal ownership dispute, which typically requires the land registry or courts, not informal mediation.",
+      "suggestedNextStep": "Refer to the Ministry of Lands / Land Registrar (Kenya) or the Land Use Act allocation authority (Nigeria) for title verification.",
+      "keywords": ["title deed", "land certificate", "registrar of titles", "certificate of occupancy", "land registry", "survey beacon", "boundary dispute over registered", "fraudulent transfer", "forged title"]
+    },
+    {
+      "id": "child_protection",
+      "label": "Child protection concern",
+      "reason": "The description raises a possible child welfare or protection concern, which is outside mediation's normal scope.",
+      "suggestedNextStep": "Refer to the Children's Officer (Kenya) or the relevant social welfare office (Nigeria) rather than continuing informal mediation.",
+      "keywords": ["child abuse", "minor was", "underage", "defilement", "child marriage", "child labor", "neglected child", "orphan inheritance dispute"]
+    },
+    {
+      "id": "criminal_matter",
+      "label": "Possible criminal matter",
+      "reason": "This description contains language suggesting a criminal offense (theft, fraud, sexual violence), which should go through police / formal justice, not mediation alone.",
+      "suggestedNextStep": "Advise the parties to also report to the nearest police station; mediation can continue on the civil aspects only if appropriate.",
+      "keywords": ["stole", "theft", "robbery", "rape", "defiled", "fraud", "forgery", "extortion", "bribery", "kidnap"]
+    }
+  ]
+}

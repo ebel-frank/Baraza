@@ -1,0 +1,47 @@
+services:
+  # Local dev only — for real hosting, set DATABASE_URL in .env to your own
+  # MongoDB connection string (e.g. Atlas) and this service isn't used at all.
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - baraza_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Prisma's MongoDB connector requires a replica set (even single-node) — a
+  # plain standalone mongod won't work. This one-shot container initiates it
+  # once and exits; `backend` waits for it to finish successfully.
+  mongo-init:
+    image: mongo:7
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint:
+      - bash
+      - -c
+      - >
+        mongosh --host mongo --quiet --eval
+        "try { rs.status().ok } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}) }"
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    command: sh -c "npx prisma db push --skip-generate && node dist/main.js"
+
+volumes:
+  baraza_mongo_data:

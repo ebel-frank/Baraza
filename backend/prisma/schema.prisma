@@ -1,0 +1,65 @@
+// Baraza backend schema (hackathon POC) — MongoDB
+//
+// NEXT STEP (not done here): field-level encryption for case descriptions/parties,
+// row-level access control per mediator/region, audit logging, and password reset /
+// refresh tokens before any real deployment.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Mediator {
+  id           String   @id @map("_id")
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  country      String
+  region       String
+  locality     String
+  createdAt    DateTime @default(now())
+
+  @@map("mediators")
+}
+
+// mediatorId is a plain field (not a Prisma @relation) — Mongo has no foreign
+// keys/joins to enforce anyway, and CasesService looks mediators up itself
+// where needed (e.g. the aggregate stats endpoint).
+model Case {
+  id               String    @id @map("_id")
+  mediatorId       String
+  caseType         String
+  parties          Json
+  description      String
+  // A case can have several separate voice-note recordings, not just one.
+  voiceNoteRefs    String[] @default([])
+  location         String
+  createdAt        DateTime
+  syncedAt         DateTime?
+  receivedAt       DateTime  @default(now())
+  referralFlag     Boolean   @default(false)
+  referralReason   String?
+  advisoryResponse Json?
+
+  @@map("cases")
+}
+
+// embedding is a plain array field — similarity search is done in application
+// code (AdvisoryService), not a DB-native vector search, so this works with
+// any MongoDB instance rather than requiring Atlas Vector Search.
+model DocumentChunk {
+  id            String   @id @map("_id")
+  documentId    String
+  documentTitle String
+  jurisdiction  String
+  section       String?
+  content       String
+  embedding     Float[]
+  createdAt     DateTime @default(now())
+
+  @@map("document_chunks")
+}

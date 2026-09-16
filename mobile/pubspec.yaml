@@ -1,0 +1,49 @@
+name: baraza
+description: "Baraza — offline-first case-logging and advisory toolkit for community mediators."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Local-first storage
+  drift: ^2.21.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # Voice intake
+  speech_to_text: ^7.0.0
+  permission_handler: ^11.3.1
+  record: ^7.0.0
+  audioplayers: ^6.1.0
+
+  # Sync + connectivity
+  connectivity_plus: ^6.1.0
+  http: ^1.2.2
+  http_parser: ^4.0.2
+
+  # Local mediator profile + misc
+  shared_preferences: ^2.3.3
+  uuid: ^4.5.1
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/config/referral_categories.json

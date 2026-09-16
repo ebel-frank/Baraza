@@ -1,0 +1,30 @@
+---
+id: nigeria_land_use_act
+title: Nigeria Land Use Act (excerpts)
+jurisdiction: Nigeria
+---
+[PLACEHOLDER / DEMO TEXT — short, paraphrased stand-ins for this hackathon prototype only.
+NOT the verbatim statutory text. Replace with real excerpts before any non-demo use.]
+
+## Section 1: Vesting of Land in the Governor
+All land in a State is vested in the Governor, who holds it in trust for the benefit of all
+Nigerians. Individuals and communities may hold land under a Right of Occupancy rather than
+outright freehold ownership.
+
+## Section 5: Statutory Right of Occupancy
+The Governor may grant a Statutory Right of Occupancy for land in urban areas. Disputes over
+the validity or boundaries of a Right of Occupancy that has already been formally granted
+should be referred to the relevant Land Registry or the courts, rather than settled informally.
+
+## Section 6: Customary Right of Occupancy
+Local Government authorities may grant a Customary Right of Occupancy for land in non-urban
+areas. Disputes between neighboring holders of customary rights of occupancy, including farm
+boundary disagreements, are commonly handled through community and customary mediation before
+escalating to formal forums.
+
+## Section 34: Existing Customary Rights on Undeveloped Land
+A person who was in lawful occupation of land under customary law immediately before the Act
+took effect is deemed to hold a Right of Occupancy over the developed portion of that land.
+Disputes about who was in lawful occupation at that time, especially where inheritance is also
+contested, often require documentary or elder testimony and are well suited to community
+mediation as a first step.

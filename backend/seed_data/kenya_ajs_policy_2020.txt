@@ -1,0 +1,37 @@
+---
+id: kenya_ajs_policy_2020
+title: Kenya National Policy on Alternative Justice Systems (AJS), 2020
+jurisdiction: Kenya
+---
+[PLACEHOLDER / DEMO TEXT — this is a short, paraphrased stand-in written for this hackathon
+prototype. It is NOT the verbatim policy text and must not be relied on for real guidance.
+Swap this file for the real policy excerpts before any non-demo use.]
+
+## Section 2.1: Definition and Scope of AJS
+Alternative Justice Systems (AJS) refers to the traditional, informal, and community-based
+mechanisms used to resolve disputes outside the formal court system, including councils of
+elders, religious and cultural forums, and community mediation. AJS is recognized as
+complementary to the formal justice system, not a replacement for it, particularly where
+constitutional rights or criminal conduct are engaged.
+
+## Section 3.4: Limits of AJS Jurisdiction
+AJS mechanisms should not be used to resolve matters involving gross human rights violations,
+sexual and gender-based violence, defilement, or other criminal offences. Such matters must be
+referred to the formal justice system, including the Police and the Judiciary, regardless of
+whether the parties wish to settle informally.
+
+## Section 4.2: Land and Succession Disputes
+AJS forums may mediate boundary and land-use disagreements between neighbors where no
+registered title is in dispute. Where a dispute concerns a registered title deed, or where
+fraud in a land transaction is alleged, the matter should be referred to the Land Registrar
+or the Environment and Land Court.
+
+## Section 5.1: Repeat Disputes
+Where a dispute has already been the subject of a prior mediation between the same parties
+and has recurred, AJS practitioners are encouraged to consider referral to a higher or formal
+forum, since repeated informal settlement may indicate an unresolved underlying issue.
+
+## Section 6.3: Safeguards for Vulnerable Parties
+Special care must be taken where a party is a minor, an elderly person, or otherwise
+vulnerable. AJS practitioners should not finalize a settlement affecting a child's welfare
+without involving the relevant Children's Officer.

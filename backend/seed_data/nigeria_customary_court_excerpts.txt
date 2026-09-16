@@ -1,0 +1,33 @@
+---
+id: nigeria_customary_court_excerpts
+title: Nigeria Customary Court Practice (NigeriaLII excerpts)
+jurisdiction: Nigeria
+---
+[PLACEHOLDER / DEMO TEXT — short, paraphrased stand-ins for this hackathon prototype only,
+loosely based on general customary court practice as reported in NigeriaLII case summaries.
+NOT verbatim case text or statute. Replace with real excerpts before any non-demo use.]
+
+## Practice Note 1: Jurisdiction of Customary Courts
+Customary Courts commonly handle matters of marriage, inheritance, and land held under
+customary tenure between persons subject to the same or similar customary law. They generally
+do not have jurisdiction over criminal matters, land already converted to statutory title, or
+disputes where one party is not subject to customary law.
+
+## Practice Note 2: Inheritance Under Customary Law
+Customary law inheritance disputes often turn on the personal law of the deceased's community
+(e.g., patrilineal or matrilineal succession rules), which can differ significantly by
+ethnicity and region. Community mediators are well placed to make an initial record of the
+family's account, but a formal customary court ruling is typically needed once multiple
+branches of a family actively dispute the distribution.
+
+## Practice Note 3: Repeat and Escalating Disputes
+Customary courts and community elders have both noted that disputes which have already been
+"settled" informally more than once, without resolving the underlying grievance, are a strong
+signal that the matter needs a different (often more formal) forum, since continued informal
+settlement can allow tension to build rather than resolve.
+
+## Practice Note 4: Domestic and Gender-Based Violence
+Where a family or marital dispute involves allegations of physical violence, customary
+mediation should not proceed as if it were a purely civil disagreement. Such cases should be
+directed toward the Police and, where relevant, a Family Support Unit, in parallel with any
+customary process.
