@@ -45,7 +45,7 @@ async function main() {
   const gemini = new GeminiClient(
     process.env.GEMINI_API_KEY ?? '',
     process.env.GEMINI_EMBEDDING_MODEL ?? 'gemini-embedding-001',
-    process.env.GEMINI_GENERATION_MODEL ?? 'gemini-flash-latest',
+    process.env.GEMINI_GENERATION_MODEL ?? 'gemini-2.5-flash',
   );
 
   const seedDir = path.join(__dirname, '..', '..', 'seed_data');

@@ -18,23 +18,19 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   int _pendingCount = 0;
   bool _syncing = false;
   String? _lastMessage;
-  late TextEditingController _urlController;
 
   @override
   void initState() {
     super.initState();
-    _urlController = TextEditingController();
     _load();
   }
 
   Future<void> _load() async {
     final lastSyncedAt = await widget.services.syncService.getLastSyncedAt();
     final pending = await widget.services.syncService.pendingCount();
-    final url = await widget.services.backendConfig.getBaseUrl();
     setState(() {
       _lastSyncedAt = lastSyncedAt;
       _pendingCount = pending;
-      _urlController.text = url;
     });
   }
 
@@ -51,12 +47,6 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
           : 'Sync failed: ${result.error}';
     });
     await _load();
-  }
-
-  Future<void> _saveUrl() async {
-    await widget.services.backendConfig.setBaseUrl(_urlController.text);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Backend URL saved.')));
   }
 
   Future<void> _signOut() async {
@@ -148,21 +138,6 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
             ),
             if (_lastMessage != null)
               Padding(padding: const EdgeInsets.only(top: 12), child: Text(_lastMessage!)),
-            const SizedBox(height: 32),
-            Text('Backend URL', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            const Text(
-              'Android emulator: keep 10.0.2.2 (alias for your computer). '
-              'Physical device on the same Wi-Fi: use your computer’s LAN IP instead.',
-              style: TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _urlController,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: _saveUrl, child: const Text('Save URL')),
             const SizedBox(height: 32),
             const Divider(),
             const SizedBox(height: 16),

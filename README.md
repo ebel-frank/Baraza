@@ -56,8 +56,12 @@ mobile/    Flutter (Android) app — Drift/SQLite local storage, offline-first
 - Flutter 3.44+ / Dart 3.12+ with the Android toolchain set up (mobile)
 - A free [Gemini API key](https://aistudio.google.com/apikey) — used for
   embeddings (`gemini-embedding-001`) and the cited-summary generation
-  (`gemini-flash-latest`). Gemini's model lineup moves fast — if either name
-  stops working, check `GET https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY`
+  (`gemini-2.5-flash` — deliberately **pinned**, not `gemini-flash-latest`:
+  that alias returned transient 503 "high demand" errors often enough in
+  testing to be unreliable for a live demo; `GeminiClient` also retries a
+  few times with backoff on 503/429 before giving up, see "Architecture
+  notes"). Gemini's model lineup moves fast — if either name stops working,
+  check `GET https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY`
   for current model names supporting `embedContent` / `generateContent` and
   update `GEMINI_EMBEDDING_MODEL` / `GEMINI_GENERATION_MODEL`.
 - An Android emulator or physical device
@@ -126,6 +130,11 @@ curl -X POST http://localhost:3000/advisory/query \
 
 ## 2. Deploy the backend to Render
 
+**Already deployed and live at `https://baraza.onrender.com`** — the mobile
+app's default backend URL points there, so you don't need to do this step
+just to run the app. These are the steps to redeploy it yourself, or update
+it after a schema/env change.
+
 Render has no native managed MongoDB — pair it with your own MongoDB
 connection string (Atlas or otherwise; this repo doesn't assume which).
 
@@ -138,7 +147,8 @@ connection string (Atlas or otherwise; this repo doesn't assume which).
      replica set, as above)
    - `GEMINI_API_KEY`
    - `GEMINI_EMBEDDING_MODEL` — `gemini-embedding-001` (or current equivalent)
-   - `GEMINI_GENERATION_MODEL` — `gemini-flash-latest` (or current equivalent)
+   - `GEMINI_GENERATION_MODEL` — `gemini-2.5-flash` (pinned; avoid `-latest`
+     aliases — see "Prerequisites" above)
    - `JWT_SECRET` — a long random string
    - Leave `PORT` unset — Render injects its own and `main.ts` already reads
      `process.env.PORT`
@@ -160,11 +170,10 @@ connection string (Atlas or otherwise; this repo doesn't assume which).
    cd backend
    DATABASE_URL="<your Render DATABASE_URL value>" GEMINI_API_KEY="<your key>" npm run seed
    ```
-6. In the mobile app: set the Sync Status screen's backend URL to your Render
-   service's public URL (`https://<your-service>.onrender.com`), and flip
-   `kSkipAuthApiCalls` back to `false` in
-   `mobile/lib/constants/dev_flags.dart` (see "Known simplifications" below)
-   to re-enable real sign-in/register against it.
+6. The backend URL is fixed in the app (not user-configurable — see
+   `mobile/lib/services/backend_config.dart`). If you deploy to a different
+   Render URL than the hardcoded `kBackendBaseUrl`, update that constant and
+   rebuild.
 
 Render's free tier spins the service down after inactivity — the first
 request after a while will be slow (cold start) while it wakes back up.
@@ -177,10 +186,17 @@ flutter pub get
 flutter run   # pick your emulator/device
 ```
 
-On an Android **emulator**, the app's default backend URL (`http://10.0.2.2:3000`)
-already points at your host machine, so no config is needed. On a **physical
-device** on the same Wi-Fi as your computer, open the app's Sync Status screen
-and change the backend URL to your computer's LAN IP, e.g. `http://192.168.1.23:3000`.
+The app's backend URL is fixed at build time (not user-configurable in the
+app) — it points at the live Render deployment
+(`https://baraza.onrender.com`), so no config is needed on any device. Render's
+free tier spins down after inactivity — the first request after a while is
+slow (cold start) while it wakes back up.
+
+For local backend dev instead (`docker compose up` in `backend/`), change
+`kBackendBaseUrl` in `mobile/lib/services/backend_config.dart` to
+`http://10.0.2.2:3000` (Android **emulator** alias for your host machine) or
+your computer's LAN IP (**physical device** on the same Wi-Fi, e.g.
+`http://192.168.1.23:3000`), then rebuild.
 
 First launch shows a **Sign In** screen. Either:
 - Tap **Register** and create a new account (username, password, full name,
@@ -236,6 +252,17 @@ documents use a native `voiceNoteRefs: String[]` field (see
 
 ## Architecture notes
 
+- **Gemini reliability**: `backend/src/gemini/gemini-client.ts` retries
+  `embed`/`generate`/`generateWithAudio` up to 3 times with exponential
+  backoff on HTTP 503/429 — Gemini's free tier returns transient "high
+  demand" 503s occasionally, and a mediator tapping "Ask for guidance"
+  shouldn't see a 500 for something that would succeed moments later.
+  `GEMINI_GENERATION_MODEL` is also deliberately pinned to `gemini-2.5-flash`
+  rather than a `-latest` alias for the same reason (see "Prerequisites").
+- **Backend URL is fixed, not user-configurable** — `kBackendBaseUrl` in
+  `mobile/lib/services/backend_config.dart` is a hardcoded constant; there's
+  no in-app setting to change it. Change the constant and rebuild if you need
+  to point at a different backend.
 - **Auth**: `backend/src/auth/` issues a JWT on register/login (bcrypt-hashed
   passwords, `POST /auth/register`, `POST /auth/login`). `JwtAuthGuard`
   protects `/sync/push`, `/sync/pull`, and `/advisory/query`; the mediator id
