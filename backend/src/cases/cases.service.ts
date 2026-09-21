@@ -180,6 +180,7 @@ export class CasesService {
     });
 
     const regionTotals = new Map<string, { region: string; count: number; referralFlagCount: number }>();
+    const caseTypeTotals = new Map<string, { caseType: string; count: number; referralFlagCount: number }>();
     for (const c of casesWithContext) {
       let r = regionTotals.get(c.region);
       if (!r) {
@@ -188,10 +189,19 @@ export class CasesService {
       }
       r.count += 1;
       if (c.referralFlag) r.referralFlagCount += 1;
+
+      let t = caseTypeTotals.get(c.caseType);
+      if (!t) {
+        t = { caseType: c.caseType, count: 0, referralFlagCount: 0 };
+        caseTypeTotals.set(c.caseType, t);
+      }
+      t.count += 1;
+      if (c.referralFlag) t.referralFlagCount += 1;
     }
 
     return {
       regions: [...regionTotals.values()].sort((a, b) => b.count - a.count),
+      caseTypes: [...caseTypeTotals.values()].sort((a, b) => b.count - a.count),
       cases: casesWithContext,
     };
   }

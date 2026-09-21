@@ -33,18 +33,18 @@ class AdminCase {
   });
 
   factory AdminCase.fromJson(Map<String, dynamic> json) => AdminCase(
-        id: json['id'] as String,
-        caseType: json['caseType'] as String,
-        parties: json['parties'],
-        description: json['description'] as String,
-        location: json['location'] as String,
-        createdAt: json['createdAt'] as String,
-        referralFlag: json['referralFlag'] as bool,
-        referralReason: json['referralReason'] as String?,
-        mediatorName: json['mediatorName'] as String,
-        region: json['region'] as String,
-        locality: json['locality'] as String,
-      );
+    id: json['id'] as String,
+    caseType: json['caseType'] as String,
+    parties: json['parties'],
+    description: json['description'] as String,
+    location: json['location'] as String,
+    createdAt: json['createdAt'] as String,
+    referralFlag: json['referralFlag'] as bool,
+    referralReason: json['referralReason'] as String?,
+    mediatorName: json['mediatorName'] as String,
+    region: json['region'] as String,
+    locality: json['locality'] as String,
+  );
 }
 
 class AdminRegionTotal {
@@ -52,10 +52,34 @@ class AdminRegionTotal {
   final int count;
   final int referralFlagCount;
 
-  AdminRegionTotal({required this.region, required this.count, required this.referralFlagCount});
+  AdminRegionTotal({
+    required this.region,
+    required this.count,
+    required this.referralFlagCount,
+  });
 
-  factory AdminRegionTotal.fromJson(Map<String, dynamic> json) => AdminRegionTotal(
+  factory AdminRegionTotal.fromJson(Map<String, dynamic> json) =>
+      AdminRegionTotal(
         region: json['region'] as String,
+        count: json['count'] as int,
+        referralFlagCount: json['referralFlagCount'] as int,
+      );
+}
+
+class AdminCaseTypeTotal {
+  final String caseType;
+  final int count;
+  final int referralFlagCount;
+
+  AdminCaseTypeTotal({
+    required this.caseType,
+    required this.count,
+    required this.referralFlagCount,
+  });
+
+  factory AdminCaseTypeTotal.fromJson(Map<String, dynamic> json) =>
+      AdminCaseTypeTotal(
+        caseType: json['caseType'] as String,
         count: json['count'] as int,
         referralFlagCount: json['referralFlagCount'] as int,
       );
@@ -63,15 +87,26 @@ class AdminRegionTotal {
 
 class AdminCaseOverview {
   final List<AdminRegionTotal> regions;
+  final List<AdminCaseTypeTotal> caseTypes;
   final List<AdminCase> cases;
 
-  AdminCaseOverview({required this.regions, required this.cases});
+  AdminCaseOverview({
+    required this.regions,
+    required this.caseTypes,
+    required this.cases,
+  });
 
-  factory AdminCaseOverview.fromJson(Map<String, dynamic> json) => AdminCaseOverview(
+  factory AdminCaseOverview.fromJson(Map<String, dynamic> json) =>
+      AdminCaseOverview(
         regions: (json['regions'] as List)
             .map((e) => AdminRegionTotal.fromJson(e as Map<String, dynamic>))
             .toList(),
-        cases: (json['cases'] as List).map((e) => AdminCase.fromJson(e as Map<String, dynamic>)).toList(),
+        caseTypes: (json['caseTypes'] as List)
+            .map((e) => AdminCaseTypeTotal.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        cases: (json['cases'] as List)
+            .map((e) => AdminCase.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 }
 
@@ -88,9 +123,11 @@ class AdminApiClient {
   final BackendConfig _config;
   final AuthSessionService _authSessionService;
 
-  AdminApiClient({BackendConfig? config, AuthSessionService? authSessionService})
-      : _config = config ?? BackendConfig(),
-        _authSessionService = authSessionService ?? AuthSessionService();
+  AdminApiClient({
+    BackendConfig? config,
+    AuthSessionService? authSessionService,
+  }) : _config = config ?? BackendConfig(),
+       _authSessionService = authSessionService ?? AuthSessionService();
 
   Future<AdminCaseOverview> fetchCaseOverview() async {
     final session = await _authSessionService.getSession();
@@ -101,9 +138,9 @@ class AdminApiClient {
     final uri = Uri.parse('$baseUrl/admin/cases');
     http.Response response;
     try {
-      response = await http.get(uri, headers: {'Authorization': 'Bearer ${session.token}'}).timeout(
-        const Duration(seconds: 20),
-      );
+      response = await http
+          .get(uri, headers: {'Authorization': 'Bearer ${session.token}'})
+          .timeout(const Duration(seconds: 20));
     } catch (e) {
       throw AdminApiException('Could not reach the backend at $baseUrl. ($e)');
     }
@@ -112,8 +149,12 @@ class AdminApiClient {
       throw AdminApiException('This account does not have admin access.');
     }
     if (response.statusCode != 200) {
-      throw AdminApiException('Backend returned ${response.statusCode}: ${response.body}');
+      throw AdminApiException(
+        'Backend returned ${response.statusCode}: ${response.body}',
+      );
     }
-    return AdminCaseOverview.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return AdminCaseOverview.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

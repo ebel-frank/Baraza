@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../app_services.dart';
 import '../services/admin_api_client.dart';
 import '../theme.dart';
+import 'admin_case_detail_screen.dart';
 import 'sign_in_screen.dart';
 
 /// Overseeing-institution dashboard: full, unanonymized case data grouped by
@@ -25,6 +26,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool _loading = true;
   String? _error;
   String? _regionFilter;
+  String? _caseTypeFilter;
 
   @override
   void initState() {
@@ -142,9 +144,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    final visibleCases = _regionFilter == null
-        ? overview.cases
-        : overview.cases.where((c) => c.region == _regionFilter).toList();
+    final visibleCases = overview.cases
+        .where((c) => _regionFilter == null || c.region == _regionFilter)
+        .where((c) => _caseTypeFilter == null || c.caseType == _caseTypeFilter)
+        .toList();
     final referredTotal = overview.cases.where((c) => c.referralFlag).length;
 
     return RefreshIndicator(
@@ -210,6 +213,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   onTap: () => setState(() => _regionFilter = r.region),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'By case type',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (_caseTypeFilter != null)
+                TextButton(
+                  onPressed: () => setState(() => _caseTypeFilter = null),
+                  child: const Text('Clear'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'What kinds of disputes are arising, most common first.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Column(
+                children: [
+                  for (final t in overview.caseTypes)
+                    _CaseTypeBar(
+                      caseType: t.caseType,
+                      count: t.count,
+                      referralFlagCount: t.referralFlagCount,
+                      maxCount: overview.caseTypes.first.count,
+                      selected: _caseTypeFilter == t.caseType,
+                      onTap: () => setState(
+                        () => _caseTypeFilter = _caseTypeFilter == t.caseType
+                            ? null
+                            : t.caseType,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -300,6 +346,92 @@ class _StatTile extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CaseTypeBar extends StatelessWidget {
+  final String caseType;
+  final int count;
+  final int referralFlagCount;
+  final int maxCount;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CaseTypeBar({
+    required this.caseType,
+    required this.count,
+    required this.referralFlagCount,
+    required this.maxCount,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final barColor = referralFlagCount > 0
+        ? BarazaTheme.danger
+        : scheme.primary;
+    final fraction = maxCount == 0 ? 0.0 : count / maxCount;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    caseType,
+                    style: TextStyle(
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: 13.5,
+                      color: selected ? scheme.primary : scheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (referralFlagCount > 0) ...[
+                  Icon(
+                    Icons.priority_high_rounded,
+                    size: 13,
+                    color: BarazaTheme.danger,
+                  ),
+                  const SizedBox(width: 2),
+                ],
+                Text(
+                  '$count',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LayoutBuilder(
+                builder: (context, constraints) => Stack(
+                  children: [
+                    Container(height: 7, color: scheme.surfaceContainerHigh),
+                    Container(
+                      height: 7,
+                      width: constraints.maxWidth * fraction,
+                      color: barColor,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -402,82 +534,89 @@ class _AdminCaseCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: 4,
-              color: caseData.referralFlag
-                  ? BarazaTheme.danger
-                  : Colors.transparent,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            caseData.caseType,
-                            style: Theme.of(context).textTheme.titleSmall,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AdminCaseDetailScreen(caseData: caseData),
+          ),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 4,
+                color: caseData.referralFlag
+                    ? BarazaTheme.danger
+                    : Colors.transparent,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              caseData.caseType,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                           ),
-                        ),
-                        if (caseData.referralFlag) _ReferredBadge(),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      caseData.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 14,
-                      runSpacing: 6,
-                      children: [
-                        _MetaItem(
-                          icon: Icons.place_outlined,
-                          text: '${caseData.locality}, ${caseData.region}',
-                        ),
-                        _MetaItem(
-                          icon: Icons.person_outline,
-                          text: caseData.mediatorName,
-                        ),
-                        if (date != null)
-                          _MetaItem(
-                            icon: Icons.event_outlined,
-                            text: DateFormat.yMMMd().format(date),
-                          ),
-                      ],
-                    ),
-                    if (caseData.referralFlag &&
-                        caseData.referralReason != null) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: RiskColors.of(context, 'high').bg,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          caseData.referralReason!,
-                          style: TextStyle(
-                            color: RiskColors.of(context, 'high').fg,
-                            fontSize: 12.5,
-                            height: 1.3,
-                          ),
-                        ),
+                          if (caseData.referralFlag) _ReferredBadge(),
+                        ],
                       ),
+                      const SizedBox(height: 6),
+                      Text(
+                        caseData.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 14,
+                        runSpacing: 6,
+                        children: [
+                          _MetaItem(
+                            icon: Icons.place_outlined,
+                            text: '${caseData.locality}, ${caseData.region}',
+                          ),
+                          _MetaItem(
+                            icon: Icons.person_outline,
+                            text: caseData.mediatorName,
+                          ),
+                          if (date != null)
+                            _MetaItem(
+                              icon: Icons.event_outlined,
+                              text: DateFormat.yMMMd().format(date),
+                            ),
+                        ],
+                      ),
+                      if (caseData.referralFlag &&
+                          caseData.referralReason != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: RiskColors.of(context, 'high').bg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            caseData.referralReason!,
+                            style: TextStyle(
+                              color: RiskColors.of(context, 'high').fg,
+                              fontSize: 12.5,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
