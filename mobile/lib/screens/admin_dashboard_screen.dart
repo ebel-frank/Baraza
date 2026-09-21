@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../app_services.dart';
 import '../services/admin_api_client.dart';
 import '../theme.dart';
+import '../widgets/nigeria_heatmap.dart';
 import 'admin_case_detail_screen.dart';
 import 'sign_in_screen.dart';
 
@@ -186,33 +187,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Text('By region', style: Theme.of(context).textTheme.titleMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('By region', style: Theme.of(context).textTheme.titleMedium),
+              if (_regionFilter != null)
+                TextButton(
+                  onPressed: () => setState(() => _regionFilter = null),
+                  child: const Text('Clear'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _regionFilter == null
+                ? 'Tap a state to see its cases.'
+                : '$_regionFilter selected: ${visibleCases.length} case${visibleCases.length == 1 ? '' : 's'}.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: 10),
-          SizedBox(
-            height: 96,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: overview.regions.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _RegionCard(
-                    label: 'All',
-                    count: overview.cases.length,
-                    riskLevel: null,
-                    selected: _regionFilter == null,
-                    onTap: () => setState(() => _regionFilter = null),
-                  );
-                }
-                final r = overview.regions[index - 1];
-                return _RegionCard(
-                  label: r.region,
-                  count: r.count,
-                  riskLevel: _riskFor(r.referralFlagCount),
-                  selected: _regionFilter == r.region,
-                  onTap: () => setState(() => _regionFilter = r.region),
-                );
-              },
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: NigeriaHeatmap(
+                regions: overview.regions,
+                selectedRegion: _regionFilter,
+                onSelectRegion: (region) =>
+                    setState(() => _regionFilter = region),
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -271,12 +273,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
-  }
-
-  static String _riskFor(int referralFlagCount) {
-    if (referralFlagCount >= 2) return 'high';
-    if (referralFlagCount >= 1) return 'medium';
-    return 'low';
   }
 }
 
@@ -430,90 +426,6 @@ class _CaseTypeBar extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RegionCard extends StatelessWidget {
-  final String label;
-  final int count;
-  final String? riskLevel;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _RegionCard({
-    required this.label,
-    required this.count,
-    required this.riskLevel,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final risk = riskLevel == null ? null : RiskColors.of(context, riskLevel!);
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Container(
-        width: 128,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: selected
-              ? scheme.primaryContainer
-              : scheme.surfaceContainerLow,
-          border: Border.all(
-            color: selected
-                ? scheme.primary
-                : scheme.outlineVariant.withValues(alpha: 0.6),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: selected
-                          ? scheme.onPrimaryContainer
-                          : scheme.onSurface,
-                    ),
-                  ),
-                ),
-                if (risk != null)
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: risk.fg,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
-            ),
-            Text(
-              '$count case${count == 1 ? '' : 's'}',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: selected ? scheme.onPrimaryContainer : scheme.onSurface,
               ),
             ),
           ],

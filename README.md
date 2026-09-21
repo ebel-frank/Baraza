@@ -35,6 +35,12 @@ over completeness, security hardening, or production data handling. See
   recover their synced cases on a new or reinstalled device. Registering and
   signing in need connectivity once; logging cases stays fully offline
   afterward.
+- An admin-role account sees an overseeing-institution dashboard: full,
+  unanonymized case detail by region and case type, including a real Nigeria
+  state choropleth (`mobile/lib/widgets/nigeria_heatmap.dart`) colored by
+  referral risk and tappable to filter. State boundaries are simplified from
+  [geoBoundaries](https://www.geoboundaries.org)' Nigeria ADM1 dataset
+  (CC-BY 4.0), pre-generated into `mobile/lib/data/nigeria_state_paths.dart`.
 
 ## Repo layout
 
