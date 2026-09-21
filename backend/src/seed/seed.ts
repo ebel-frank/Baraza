@@ -149,7 +149,7 @@ async function seedExampleCases(prisma: PrismaClient) {
       caseType: 'Land boundary',
       parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
       description:
-        'Two neighboring farmers disagree on where the boundary between their unregistered plots lies after a fence was moved during the last planting season.',
+        'The complainant, a maize farmer, says his neighbor moved a boundary fence roughly two meters onto his plot during land preparation in early March. Both farmers have worked adjoining unregistered plots inherited from their fathers for over fifteen years, with no formal survey on either side. The neighbor says he only restored the fence to where his late father originally set it, and disputes the complainant\'s version of the boundary. Village elders inspected the site and found no clear boundary markers, only an old thorn hedge partially grown over. Both parties agreed to mediation rather than involve the Land Registry, since neither holds a certificate of occupancy and a formal survey would be costly. This is their first time bringing the dispute to mediation.',
       location: 'Kaduna, Nigeria',
       referralFlag: false,
       referralReason: null,
@@ -159,7 +159,7 @@ async function seedExampleCases(prisma: PrismaClient) {
       caseType: 'Family / inheritance',
       parties: [{ role: 'Widow' }, { role: 'Deceased’s brother' }],
       description:
-        'A widow says her late husband’s brother is claiming the family land and threatened her when she refused to leave the homestead.',
+        'The widow, in her early fifties, says her late husband\'s younger brother arrived at the family homestead with three other relatives, informing her the land and house now belonged to him under family custom since her husband died without a will. She has lived on the land for over twenty years and has four children still in school. When she refused to leave, the brother-in-law reportedly raised his voice, pushed past her into the compound, and said he would return with more relatives if she had not packed by the end of the month. No physical injury occurred, but she is frightened and has not returned to the homestead alone since. She wants to know her rights to remain and whether the threat itself should be reported before mediation continues.',
       location: 'Zaria, Nigeria',
       referralFlag: true,
       referralReason: 'Threat mentioned alongside a land/inheritance dispute. Escalating conflict, refer before continuing mediation.',
@@ -169,7 +169,7 @@ async function seedExampleCases(prisma: PrismaClient) {
       caseType: 'Neighbor dispute',
       parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
       description:
-        'This is the third time these two neighbors have brought the same water-access disagreement to mediation this year.',
+        'Two neighboring households have disputed access to a shared borehole for over a year. The complainant says the other family began fetching water at odd hours and, on two occasions, blocked the shared path with farm produce to discourage use. This is the third time the same two parties have brought this exact dispute to mediation, most recently in June and again in August, each time reaching a verbal agreement on shared hours that broke down within weeks. The complainant says the other party stopped honoring the June agreement almost immediately. Both households depend on the borehole since the nearest alternative source is over a kilometer away. Given the repeat pattern, the mediator is uncertain informal mediation alone will resolve the underlying tension this time.',
       location: 'Enugu, Nigeria',
       referralFlag: true,
       referralReason: 'Repeat dispute between the same parties. Mediation is not resolving the underlying issue.',
