@@ -2,6 +2,7 @@
 id: nigeria_land_use_act
 title: Nigeria Land Use Act (excerpts)
 jurisdiction: Nigeria
+source_url: https://lawsofnigeria.placng.org/view2.php?sn=228
 ---
 [PLACEHOLDER / DEMO TEXT — short, paraphrased stand-ins for this hackathon prototype only.
 NOT the verbatim statutory text. Replace with real excerpts before any non-demo use.]

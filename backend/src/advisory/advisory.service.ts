@@ -9,6 +9,7 @@ export interface AdvisoryCitation {
   documentTitle: string;
   jurisdiction: string;
   section: string | null;
+  sourceUrl: string | null;
   excerpt: string;
   similarity: number;
 }
@@ -128,6 +129,7 @@ REFERRAL_NOTE: <one sentence, only if REFERRAL is YES, else "none">`;
         documentTitle: r.documentTitle,
         jurisdiction: r.jurisdiction,
         section: r.section,
+        sourceUrl: r.sourceUrl,
         excerpt: r.content,
         similarity: r.similarity,
       })),

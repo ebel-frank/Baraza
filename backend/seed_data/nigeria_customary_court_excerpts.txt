@@ -2,6 +2,7 @@
 id: nigeria_customary_court_excerpts
 title: Nigeria Customary Court Practice (NigeriaLII excerpts)
 jurisdiction: Nigeria
+source_url: https://nigerialii.org/judgments/NGCCA/
 ---
 [PLACEHOLDER / DEMO TEXT — short, paraphrased stand-ins for this hackathon prototype only,
 loosely based on general customary court practice as reported in NigeriaLII case summaries.

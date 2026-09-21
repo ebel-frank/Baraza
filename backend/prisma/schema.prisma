@@ -62,6 +62,10 @@ model DocumentChunk {
   documentTitle String
   jurisdiction  String
   section       String?
+  // Link to the real published source (e.g. NigeriaLII, PLAC's Laws of
+  // Nigeria) — the excerpt itself is a paraphrased placeholder (see
+  // seed_data/*.txt), but this always points at the genuine source text.
+  sourceUrl     String?
   content       String
   embedding     Float[]
   createdAt     DateTime @default(now())

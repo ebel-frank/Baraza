@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../services/advisory_api_client.dart';
 import '../theme.dart';
@@ -22,7 +23,7 @@ class AdvisoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Guidance')),
+      appBar: AppBar(title: const Text('AI Guidance')),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -129,34 +130,77 @@ class _CitationCard extends StatelessWidget {
   final AdvisoryCitation citation;
   const _CitationCard({required this.citation});
 
+  Future<void> _openSource(BuildContext context) async {
+    final url = citation.sourceUrl;
+    if (url == null) return;
+    final uri = Uri.parse(url);
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not open $url')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final hasSource = citation.sourceUrl != null;
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${citation.documentTitle}${citation.section != null ? ' (${citation.section})' : ''}',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              citation.jurisdiction,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              citation.excerpt,
-              style: TextStyle(
-                fontStyle: FontStyle.italic,
-                color: scheme.onSurfaceVariant,
-                height: 1.4,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: hasSource ? () => _openSource(context) : null,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${citation.documentTitle}${citation.section != null ? ' (${citation.section})' : ''}',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  if (hasSource) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.open_in_new_rounded,
+                      size: 16,
+                      color: scheme.primary,
+                    ),
+                  ],
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                citation.jurisdiction,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                citation.excerpt,
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: scheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+              if (hasSource) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'View published source',
+                  style: TextStyle(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

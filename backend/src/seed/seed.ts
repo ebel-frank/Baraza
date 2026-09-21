@@ -18,6 +18,7 @@ interface ParsedDoc {
   id: string;
   title: string;
   jurisdiction: string;
+  sourceUrl: string | null;
   chunks: { section: string; content: string }[];
 }
 
@@ -42,7 +43,7 @@ function parseSeedFile(raw: string): ParsedDoc {
     chunks.push({ section: section.trim(), content: content.trim() });
   }
 
-  return { id: meta.id, title: meta.title, jurisdiction: meta.jurisdiction, chunks };
+  return { id: meta.id, title: meta.title, jurisdiction: meta.jurisdiction, sourceUrl: meta.source_url ?? null, chunks };
 }
 
 async function main() {
@@ -83,6 +84,7 @@ async function main() {
           documentTitle: doc.title,
           jurisdiction: doc.jurisdiction,
           section: chunk.section,
+          sourceUrl: doc.sourceUrl,
           content: chunk.content,
           embedding,
         },
@@ -193,6 +195,56 @@ async function seedExampleCases(prisma: PrismaClient) {
       location: 'Sokoto, Nigeria',
       referralFlag: true,
       referralReason: 'Alleged rape. Criminal matter, refer immediately to police, mediation does not apply.',
+    },
+    {
+      id: 'demo-case-6',
+      caseType: 'Debt / property',
+      parties: [{ role: 'Farmer' }, { role: 'Herder' }],
+      description:
+        'A herder\'s cattle strayed into a farmer\'s groundnut field overnight and destroyed roughly half an acre of the crop ahead of harvest. Both parties agree the herd owner is responsible under the long-standing local custom of compensating for crop damage, but disagree on the value: the farmer wants compensation based on the expected market price at harvest, while the herder is offering a flat sum based on the damaged area. The village head\'s office referred them to the mediator to agree on a fair figure before the disagreement escalates, as has happened between other households in the area. Both parties brought a neutral farmer from a neighboring village to help estimate the loss.',
+      location: 'Jos, Nigeria',
+      referralFlag: false,
+      referralReason: null,
+    },
+    {
+      id: 'demo-case-7',
+      caseType: 'Domestic / marital',
+      parties: [{ role: 'Husband\'s family' }, { role: 'Wife\'s family' }],
+      description:
+        'A marriage ended after four years without children, and the wife\'s family has approached the husband\'s family to formally end the union under customary law. The husband\'s family is asking for repayment of the bride price and other marriage expenses before agreeing to the separation, while the wife\'s family says most of that amount was already spent on gifts exchanged during the marriage and should not be repaid in full. Both families have a history of intermarriage and want to preserve the relationship between the two households. They approached the mediator jointly, before either side involves the customary court.',
+      location: 'Ibadan, Nigeria',
+      referralFlag: false,
+      referralReason: null,
+    },
+    {
+      id: 'demo-case-8',
+      caseType: 'Debt / property',
+      parties: [{ role: 'Complainant' }, { role: 'Debtor' }],
+      description:
+        'A cloth trader gave a fellow trader goods on credit worth about 400,000 naira, to be repaid after the goods were resold, as is common practice among traders in this market. Repayment is now three months overdue. The debtor says sales have been slow since the market\'s access road was blocked for construction, and she has only been able to repay a small portion so far. The complainant says she has her own suppliers to pay and cannot keep waiting indefinitely. Both are members of the same trade association and want to avoid the matter being raised at the association\'s general meeting, which would damage the debtor\'s standing among other traders.',
+      location: 'Onitsha, Nigeria',
+      referralFlag: false,
+      referralReason: null,
+    },
+    {
+      id: 'demo-case-9',
+      caseType: 'Other',
+      parties: [{ role: 'First son' }, { role: 'Second son' }],
+      description:
+        'Following the death of a compound head, two of his sons each claim they are the rightful successor under family tradition, one citing his status as first son and the other citing an earlier private understanding with their late father. Extended family members are divided along the same lines, and a planned family meeting to install a successor was cancelled after tempers flared. Because the compound head\'s role in this community is tied to the wider chieftaincy structure recognized by the local government, the mediator explained that a formal succession dispute like this ultimately has to go through the relevant chieftaincy declaration process, though the mediator can still help the family communicate calmly in the meantime.',
+      location: 'Benin City, Nigeria',
+      referralFlag: true,
+      referralReason: 'Formal chieftaincy succession matter governed by state chieftaincy law, outside informal mediation. Direct the family to the local government chieftaincy affairs office.',
+    },
+    {
+      id: 'demo-case-10',
+      caseType: 'Neighbor dispute',
+      parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
+      description:
+        'A neighbor recently began running a large generator most evenings because of frequent power outages, and the noise and fumes reach directly into the complainant\'s bedroom window, disturbing a household member who works night shifts and sleeps during the evening. The generator owner says he has no alternative since he also works from home and needs power for his business. Both sides are willing to compromise but have not been able to agree on a workable schedule on their own. This is the first time either party has sought help with the disagreement.',
+      location: 'Lagos, Nigeria',
+      referralFlag: false,
+      referralReason: null,
     },
   ];
 
