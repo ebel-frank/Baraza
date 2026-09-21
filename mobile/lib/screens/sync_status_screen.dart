@@ -60,7 +60,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
           content: Text(
             'You have $pending case(s) not yet synced to the backend. Signing out '
             'clears this device’s local cache, so sync first or you’ll lose access '
-            'to them here until you sign back in and they’re re-pulled — pending, '
+            'to them here until you sign back in and they’re re-pulled. Pending, '
             'never-synced cases cannot be recovered.',
           ),
           actions: [

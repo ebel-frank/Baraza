@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'No cases logged yet. Tap + to log your first case — it works fully offline.',
+                  'No cases logged yet. Tap + to log your first case. It works fully offline.',
                   textAlign: TextAlign.center,
                 ),
               ),

@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Needs an internet connection once — logging cases afterward works fully offline.',
+                        'Needs an internet connection once. Logging cases afterward works fully offline.',
                         style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                       ),
                       const SizedBox(height: 24),

@@ -156,7 +156,7 @@ async function seedExampleCases(prisma: PrismaClient) {
         'A widow says her late husband’s brother is claiming the family land and threatened her when she refused to leave the homestead.',
       location: 'Zaria, Nigeria',
       referralFlag: true,
-      referralReason: 'Threat mentioned alongside a land/inheritance dispute — escalating conflict, refer before continuing mediation.',
+      referralReason: 'Threat mentioned alongside a land/inheritance dispute. Escalating conflict, refer before continuing mediation.',
     },
     {
       id: 'demo-case-3',
@@ -166,7 +166,7 @@ async function seedExampleCases(prisma: PrismaClient) {
         'This is the third time these two neighbors have brought the same water-access disagreement to mediation this year.',
       location: 'Enugu, Nigeria',
       referralFlag: true,
-      referralReason: 'Repeat dispute between the same parties — mediation is not resolving the underlying issue.',
+      referralReason: 'Repeat dispute between the same parties. Mediation is not resolving the underlying issue.',
     },
   ];
 

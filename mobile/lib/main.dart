@@ -5,6 +5,7 @@ import 'screens/admin_dashboard_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'services/auth_session_service.dart';
+import 'theme.dart';
 
 void main() {
   runApp(const BarazaApp());
@@ -38,7 +39,9 @@ class _BarazaAppState extends State<BarazaApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Baraza',
-      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
+      theme: BarazaTheme.light(),
+      darkTheme: BarazaTheme.dark(),
+      themeMode: ThemeMode.system,
       home: FutureBuilder<AuthSession?>(
         future: _sessionFuture,
         builder: (context, snapshot) {

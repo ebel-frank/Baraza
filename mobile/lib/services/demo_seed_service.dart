@@ -22,7 +22,7 @@ class DemoSeedService {
           partiesJson: jsonEncode([{'role': 'Complainant'}, {'role': 'Neighbor'}]),
           description:
               'Two neighboring farmers disagree on where the boundary between their unregistered plots lies after a fence was moved during the last planting season.',
-          location: 'Kajiado, Kenya',
+          location: 'Kaduna, Nigeria',
           createdAt: now.subtract(const Duration(days: 2)),
         ));
 
@@ -33,11 +33,11 @@ class DemoSeedService {
               jsonEncode([{'role': 'Widow'}, {'role': "Deceased's brother"}]),
           description:
               "A widow says her late husband's brother is claiming the family land and threatened her when she refused to leave the homestead.",
-          location: 'Kisumu, Kenya',
+          location: 'Zaria, Nigeria',
           createdAt: now.subtract(const Duration(days: 1)),
           referralFlag: const Value(true),
           referralReason: const Value(
-              'Threat mentioned alongside a land/inheritance dispute — escalating conflict, refer before continuing mediation.'),
+              'Threat mentioned alongside a land/inheritance dispute. Escalating conflict, refer before continuing mediation.'),
         ));
 
     await db.into(db.cases).insert(CasesCompanion.insert(
@@ -50,7 +50,7 @@ class DemoSeedService {
           createdAt: now,
           referralFlag: const Value(true),
           referralReason: const Value(
-              'Repeat dispute between the same parties — mediation is not resolving the underlying issue.'),
+              'Repeat dispute between the same parties. Mediation is not resolving the underlying issue.'),
         ));
 
     await prefs.setBool(_keySeeded, true);

@@ -43,7 +43,7 @@ class ReferralBanner extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'This is a prompt to consider referral, not a diagnosis — use your judgement.',
+              'This is a prompt to consider referral, not a diagnosis. Use your judgement.',
               style: TextStyle(fontSize: 12, color: Colors.black54),
             ),
           ),

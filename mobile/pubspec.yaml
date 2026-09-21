@@ -1,5 +1,5 @@
 name: baraza
-description: "Baraza — offline-first case-logging and advisory toolkit for community mediators."
+description: "Baraza: offline-first case-logging and advisory toolkit for community mediators."
 publish_to: 'none'
 
 version: 1.0.0+1

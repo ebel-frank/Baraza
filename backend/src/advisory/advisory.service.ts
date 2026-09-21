@@ -62,7 +62,7 @@ export class AdvisoryService {
       const result: AdvisoryResult = {
         summary:
           'No excerpt in the seeded corpus is close enough to this case to cite with confidence. ' +
-          'Do not answer from general knowledge — ask a supervising mediator or check the full statute directly.',
+          'Do not answer from general knowledge. Ask a supervising mediator or check the full statute directly.',
         citations: [],
         suggestsReferral: keywordCheck.flagged,
         referralNote: keywordCheck.flagged ? keywordCheck.reason ?? null : null,

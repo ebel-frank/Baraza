@@ -26,7 +26,7 @@ export class JwtAuthGuard implements CanActivate {
       req.role = payload.role ?? 'mediator';
       return true;
     } catch {
-      throw new UnauthorizedException('Invalid or expired token — please sign in again.');
+      throw new UnauthorizedException('Invalid or expired token. Please sign in again.');
     }
   }
 }

@@ -332,7 +332,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
             const SizedBox(height: 24),
             Text('Voice notes (optional)', style: Theme.of(context).textTheme.titleSmall),
             const Text(
-              'Real recordings, kept alongside the description — not just text. Record as many as you need.',
+              'Real recordings, kept alongside the description, not just text. Record as many as you need.',
               style: TextStyle(fontSize: 12, color: Colors.black54),
             ),
             const SizedBox(height: 8),

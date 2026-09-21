@@ -193,7 +193,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${c.documentTitle}${c.section != null ? ' — ${c.section}' : ''}',
+                                '${c.documentTitle}${c.section != null ? ' (${c.section})' : ''}',
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               Text(c.jurisdiction,
