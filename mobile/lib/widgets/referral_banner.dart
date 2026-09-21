@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+
 class ReferralBanner extends StatelessWidget {
   final String? reason;
   final String? suggestedNextStep;
@@ -8,14 +10,14 @@ class ReferralBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final risk = RiskColors.of(context, 'high');
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        border: Border.all(color: Colors.orange.shade300),
-        borderRadius: BorderRadius.circular(8),
+        color: risk.bg,
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,28 +25,41 @@ class ReferralBanner extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.flag, color: Colors.orange.shade800),
-              const SizedBox(width: 8),
+              Icon(Icons.flag_rounded, color: risk.fg, size: 20),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'This case may be outside mediation’s normal scope',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: risk.fg,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],
           ),
-          if (reason != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(reason!)),
-          if (suggestedNextStep != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('Suggested next step: $suggestedNextStep',
-                  style: const TextStyle(fontStyle: FontStyle.italic)),
+          if (reason != null) ...[
+            const SizedBox(height: 8),
+            Text(reason!, style: TextStyle(color: risk.fg, height: 1.4)),
+          ],
+          if (suggestedNextStep != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Suggested next step: $suggestedNextStep',
+              style: TextStyle(
+                color: risk.fg,
+                fontStyle: FontStyle.italic,
+                height: 1.4,
+              ),
             ),
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'This is a prompt to consider referral, not a diagnosis. Use your judgement.',
-              style: TextStyle(fontSize: 12, color: Colors.black54),
+          ],
+          const SizedBox(height: 10),
+          Text(
+            'This is a prompt to consider referral, not a diagnosis. Use your judgement.',
+            style: TextStyle(
+              fontSize: 12,
+              color: risk.fg.withValues(alpha: 0.75),
             ),
           ),
         ],
