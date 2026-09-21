@@ -56,7 +56,10 @@ class _SignInScreenState extends State<SignInScreen> {
         region: 'N/A',
         locality: 'N/A',
       );
-      await widget.services.authSessionService.saveSession('dev-bypass-token', profile);
+      await widget.services.authSessionService.saveSession(
+        'dev-bypass-token',
+        profile,
+      );
       if (!mounted) return;
       _navigateAfterLogin(profile);
       return;
@@ -67,7 +70,10 @@ class _SignInScreenState extends State<SignInScreen> {
         username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
-      await widget.services.authSessionService.saveSession(result.token, result.profile);
+      await widget.services.authSessionService.saveSession(
+        result.token,
+        result.profile,
+      );
       if (!result.profile.isAdmin) {
         // Recover any cases already synced under this account (e.g. a new/reinstalled app).
         await widget.services.syncService.pullFromServer();
@@ -94,7 +100,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _goToRegister() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RegisterScreen(services: widget.services)),
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(services: widget.services),
+      ),
     );
   }
 
@@ -107,89 +115,135 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             const AuthHeader(icon: Icons.balance),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text('Login', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Please sign in to continue.',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const SizedBox(height: 28),
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Username',
-                          prefixIcon: Icon(Icons.person_outline),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                          ),
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                        onFieldSubmitted: (_) => _submit(),
-                      ),
-                      const SizedBox(height: 24),
-                      if (_error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(_error!, style: const TextStyle(color: Colors.red)),
-                        ),
-                      FilledButton(
-                        onPressed: _saving ? null : _submit,
-                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                        child: _saving
-                            ? const SizedBox(
-                                height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Text('Sign In'),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account? "),
-                          GestureDetector(
-                            onTap: _saving ? null : _goToRegister,
-                            child: Text(
-                              'Register',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
+              child: LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 48,
+                    ),
+                    child: Center(
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Login',
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Please sign in to continue.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(height: 28),
+                            TextFormField(
+                              controller: _usernameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Username',
+                                prefixIcon: Icon(Icons.person_outline),
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'Required'
+                                  : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                                border: const OutlineInputBorder(),
+                              ),
+                              validator: (v) =>
+                                  (v == null || v.isEmpty) ? 'Required' : null,
+                              onFieldSubmitted: (_) => _submit(),
+                            ),
+                            const SizedBox(height: 24),
+                            if (_error != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            FilledButton(
+                              onPressed: _saving ? null : _submit,
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                              child: _saving
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Sign In'),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text("Don't have an account? "),
+                                GestureDetector(
+                                  onTap: _saving ? null : _goToRegister,
+                                  child: Text(
+                                    'Register',
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: TextButton(
+                                onPressed: _saving
+                                    ? null
+                                    : () {
+                                        _usernameController.text =
+                                            kAdminUsername;
+                                        _passwordController.text =
+                                            kAdminPassword;
+                                      },
+                                child: const Text(
+                                  'Signing in as the overseeing institution? Use the admin demo account',
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: TextButton(
-                          onPressed: _saving
-                              ? null
-                              : () {
-                                  _usernameController.text = kAdminUsername;
-                                  _passwordController.text = kAdminPassword;
-                                },
-                          child: const Text('Signing in as the overseeing institution? Use the admin demo account'),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
