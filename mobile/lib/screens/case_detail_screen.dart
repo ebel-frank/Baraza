@@ -9,7 +9,9 @@ import '../app_services.dart';
 import '../db/database.dart';
 import '../services/advisory_api_client.dart';
 import '../services/audio_player_service.dart';
+import '../theme.dart';
 import '../widgets/referral_banner.dart';
+import 'advisory_screen.dart';
 
 class CaseDetailScreen extends StatefulWidget {
   final AppServices services;
@@ -60,6 +62,15 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     await _audioPlayerService.play(path);
   }
 
+  void _openGuidance(Case caseRecord, AdvisoryResult advisory) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            AdvisoryScreen(caseType: caseRecord.caseType, advisory: advisory),
+      ),
+    );
+  }
+
   Future<void> _askForGuidance(Case caseRecord) async {
     setState(() {
       _loadingAdvisory = true;
@@ -67,7 +78,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     });
     try {
       // Sends both the description text and any actual voice recordings —
-      // the backend has Gemini consider all of it when producing the summary.
+      // the backend has Gemini consider all of it when producing the guidance.
       final voiceNotePaths = caseRecord.voiceNoteRefsJson == null
           ? <String>[]
           : (jsonDecode(caseRecord.voiceNoteRefsJson!) as List).cast<String>();
@@ -83,6 +94,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
         referralFlag: caseRecord.referralFlag || result.suggestsReferral,
         referralReason: caseRecord.referralReason ?? result.referralNote,
       );
+      if (mounted) _openGuidance(caseRecord, result);
     } on AdvisoryApiException catch (e) {
       setState(() => _advisoryError = e.message);
     } catch (e) {
@@ -94,6 +106,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Case detail')),
       body: SafeArea(
@@ -139,142 +152,172 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                   caseRecord.caseType,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${caseRecord.location} · ${DateFormat.yMMMd().format(caseRecord.createdAt)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _MetaItem(
+                      icon: Icons.place_outlined,
+                      text: caseRecord.location,
+                    ),
+                    _MetaItem(
+                      icon: Icons.event_outlined,
+                      text: DateFormat.yMMMd().format(caseRecord.createdAt),
+                    ),
+                    _SyncBadge(synced: caseRecord.syncedAt != null),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Chip(
-                  label: Text(
-                    caseRecord.syncedAt != null ? 'Synced' : 'Pending sync',
-                  ),
-                  avatar: Icon(
-                    caseRecord.syncedAt != null
-                        ? Icons.cloud_done
-                        : Icons.cloud_off,
-                    size: 16,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 if (parties.isNotEmpty) ...[
                   Text(
                     'Parties',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     children: parties.map((r) => Chip(label: Text(r))).toList(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                 ],
                 Text(
                   'Description',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 4),
-                Text(caseRecord.description),
+                const SizedBox(height: 6),
+                Text(
+                  caseRecord.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 if (voiceNotePaths.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  ...voiceNotePaths.asMap().entries.map((entry) {
-                    final playing = _isPlaying(entry.value);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: OutlinedButton.icon(
-                        onPressed: () => _togglePlayVoiceNote(entry.value),
-                        icon: Icon(
-                          playing ? Icons.pause_circle : Icons.play_circle,
-                        ),
-                        label: Text(
-                          playing
-                              ? 'Playing voice note ${entry.key + 1}…'
-                              : 'Play voice note ${entry.key + 1}',
-                        ),
+                  for (final entry in voiceNotePaths.asMap().entries) ...[
+                    OutlinedButton.icon(
+                      onPressed: () => _togglePlayVoiceNote(entry.value),
+                      icon: Icon(
+                        _isPlaying(entry.value)
+                            ? Icons.pause_circle
+                            : Icons.play_circle,
                       ),
-                    );
-                  }),
+                      label: Text(
+                        _isPlaying(entry.value)
+                            ? 'Playing voice note ${entry.key + 1}…'
+                            : 'Play voice note ${entry.key + 1}',
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                  ],
                 ],
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 FilledButton.icon(
                   onPressed: _loadingAdvisory
                       ? null
-                      : () => _askForGuidance(caseRecord),
+                      : () => advisory != null
+                            ? _openGuidance(caseRecord, advisory)
+                            : _askForGuidance(caseRecord),
                   icon: _loadingAdvisory
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 16,
                           width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: scheme.onPrimary,
+                          ),
                         )
-                      : const Icon(Icons.menu_book),
-                  label: const Text('Ask for guidance'),
+                      : Icon(
+                          advisory != null
+                              ? Icons.menu_book_rounded
+                              : Icons.auto_awesome_rounded,
+                        ),
+                  label: Text(
+                    _loadingAdvisory
+                        ? 'Getting guidance…'
+                        : advisory != null
+                        ? 'View guidance'
+                        : 'Ask for guidance',
+                  ),
                 ),
+                if (advisory != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: _loadingAdvisory
+                            ? null
+                            : () => _askForGuidance(caseRecord),
+                        child: const Text('Ask again'),
+                      ),
+                    ),
+                  ),
                 if (_advisoryError != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       _advisoryError!,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(color: BarazaTheme.danger),
                     ),
                   ),
-                if (advisory != null) ...[
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  Text(
-                    'Guidance',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(advisory.summary),
-                  const SizedBox(height: 12),
-                  if (advisory.citations.isEmpty)
-                    const Text(
-                      'No sourced excerpt was confident enough to cite.',
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    )
-                  else
-                    ...advisory.citations.map(
-                      (c) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${c.documentTitle}${c.section != null ? ' (${c.section})' : ''}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                c.jurisdiction,
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                c.excerpt,
-                                style: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  Text(
-                    'Generated ${DateFormat.yMMMd().add_jm().format(DateTime.parse(advisory.generatedAt))}',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                  ),
-                ],
               ],
             );
           },
         ),
       ),
+    );
+  }
+}
+
+class _MetaItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _MetaItem({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+class _SyncBadge extends StatelessWidget {
+  final bool synced;
+  const _SyncBadge({required this.synced});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = synced ? BarazaTheme.success : scheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          synced ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
+          size: 15,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          synced ? 'Synced' : 'Pending sync',
+          style: TextStyle(
+            fontSize: 13,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

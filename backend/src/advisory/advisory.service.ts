@@ -86,15 +86,20 @@ export class AdvisoryService {
       )
       .join('\n\n');
 
-    const prompt = `You are a legal-reference assistant for community dispute mediators in Kenya and Nigeria.
-You must answer ONLY using the excerpts below for any legal claim or citation. Never use outside/general legal knowledge.
+    const prompt = `You are an advisory assistant for community dispute mediators in Nigeria. The mediator
+already knows the facts of their own case — do not summarize or restate the case description back to them.
+Your job is to tell them what to DO NEXT: concrete, practical next steps for handling this specific
+mediation, in plain language.
+You must ground every legal claim in the excerpts below only. Never use outside/general legal knowledge.
 For every legal claim, cite the excerpt's document title and section, e.g. "(Land Use Act, Section 6)".
-If the excerpts don't clearly answer the question, say so plainly instead of guessing.
+If the excerpts don't clearly support a next step, say so plainly instead of guessing.
 ${
   audioClips.length > 0
-    ? `${audioClips.length > 1 ? `${audioClips.length} audio recordings` : 'An audio recording'} of the case ${audioClips.length > 1 ? 'are' : 'is'} attached alongside the transcribed text below — listen to them for tone, urgency, or detail the transcription may have missed, and factor that into your summary (but still only cite the written excerpts, never invent a citation from the audio).\n`
+    ? `${audioClips.length > 1 ? `${audioClips.length} audio recordings` : 'An audio recording'} of the case ${audioClips.length > 1 ? 'are' : 'is'} attached alongside the transcribed text below — listen to them for tone, urgency, or detail the transcription may have missed, and factor that into your guidance (but still only cite the written excerpts, never invent a citation from the audio).\n`
     : ''
-}Keep the summary to 3-5 sentences, in plain language a non-lawyer can act on.
+}Give 2-4 concrete next steps as short sentences (e.g. what to verify, who to involve, what process to
+propose to the parties). This is a suggestion for the mediator to weigh, never a ruling or instruction
+they must follow.
 
 CASE DESCRIPTION:
 ${description}
@@ -106,7 +111,7 @@ REFERRAL CATEGORIES (for your second task only — do not treat this list as leg
 ${categoriesBlock}
 
 Respond in exactly this format:
-SUMMARY: <your cited summary>
+GUIDANCE: <your cited next-step recommendations>
 REFERRAL: <YES or NO>
 REFERRAL_NOTE: <one sentence, only if REFERRAL is YES, else "none">`;
 
@@ -136,7 +141,7 @@ REFERRAL_NOTE: <one sentence, only if REFERRAL is YES, else "none">`;
   }
 
   private parseModelResponse(raw: string): { summary: string; referral: boolean; referralNote: string | null } {
-    const summaryMatch = raw.match(/SUMMARY:\s*([\s\S]*?)(?:\nREFERRAL:|$)/i);
+    const summaryMatch = raw.match(/GUIDANCE:\s*([\s\S]*?)(?:\nREFERRAL:|$)/i);
     const referralMatch = raw.match(/REFERRAL:\s*(YES|NO)/i);
     const noteMatch = raw.match(/REFERRAL_NOTE:\s*(.*)/i);
     return {
