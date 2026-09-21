@@ -1,4 +1,5 @@
 import 'db/database.dart';
+import 'services/admin_api_client.dart';
 import 'services/advisory_api_client.dart';
 import 'services/auth_api_client.dart';
 import 'services/auth_session_service.dart';
@@ -18,6 +19,7 @@ class AppServices {
   final AdvisoryApiClient advisoryApiClient;
   final SyncService syncService;
   final DemoSeedService demoSeedService;
+  final AdminApiClient adminApiClient;
 
   AppServices._(
     this.db,
@@ -28,6 +30,7 @@ class AppServices {
     this.advisoryApiClient,
     this.syncService,
     this.demoSeedService,
+    this.adminApiClient,
   );
 
   static AppServices create() {
@@ -43,6 +46,7 @@ class AppServices {
       AdvisoryApiClient(config: backendConfig, authSessionService: authSessionService),
       SyncService(db: db, backendConfig: backendConfig, authSessionService: authSessionService),
       DemoSeedService(),
+      AdminApiClient(config: backendConfig, authSessionService: authSessionService),
     );
   }
 }

@@ -9,6 +9,11 @@ import { GeminiClient } from '../gemini/gemini-client';
 const DEMO_USERNAME = 'demo';
 const DEMO_PASSWORD = 'password123';
 
+// Overseeing-institution admin account — sees unanonymized case data, gated
+// by the admin dashboard on the mobile app. Not self-registerable.
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'admin123';
+
 interface ParsedDoc {
   id: string;
   title: string;
@@ -83,9 +88,29 @@ async function main() {
   console.log(`Seeded ${total} document chunks with embeddings.`);
 
   await seedExampleCases(prisma);
+  await seedAdminAccount(prisma);
   await seedDashboardDemoData(prisma);
 
   await prisma.$disconnect();
+}
+
+async function seedAdminAccount(prisma: PrismaClient) {
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  await prisma.mediator.upsert({
+    where: { id: 'admin-1' },
+    create: {
+      id: 'admin-1',
+      username: ADMIN_USERNAME,
+      passwordHash,
+      fullName: 'Ministry of Justice ADR Desk',
+      country: 'Nigeria',
+      region: 'Federal',
+      locality: 'Abuja',
+      role: 'admin',
+    },
+    update: { username: ADMIN_USERNAME, passwordHash, fullName: 'Ministry of Justice ADR Desk', role: 'admin' },
+  });
+  console.log(`Seeded admin account — sign in with username "${ADMIN_USERNAME}" / password "${ADMIN_PASSWORD}".`);
 }
 
 async function seedExampleCases(prisma: PrismaClient) {
@@ -98,11 +123,17 @@ async function seedExampleCases(prisma: PrismaClient) {
       username: DEMO_USERNAME,
       passwordHash,
       fullName: 'Demo Mediator',
-      country: 'Kenya',
-      region: 'Kajiado County',
-      locality: 'Kajiado Town',
+      country: 'Nigeria',
+      region: 'Kaduna State',
+      locality: 'Kaduna',
     },
-    update: { username: DEMO_USERNAME, passwordHash },
+    update: {
+      username: DEMO_USERNAME,
+      passwordHash,
+      country: 'Nigeria',
+      region: 'Kaduna State',
+      locality: 'Kaduna',
+    },
   });
   console.log(`Seeded demo account — sign in with username "${DEMO_USERNAME}" / password "${DEMO_PASSWORD}".`);
 
@@ -113,7 +144,7 @@ async function seedExampleCases(prisma: PrismaClient) {
       parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
       description:
         'Two neighboring farmers disagree on where the boundary between their unregistered plots lies after a fence was moved during the last planting season.',
-      location: 'Kajiado, Kenya',
+      location: 'Kaduna, Nigeria',
       referralFlag: false,
       referralReason: null,
     },
@@ -123,7 +154,7 @@ async function seedExampleCases(prisma: PrismaClient) {
       parties: [{ role: 'Widow' }, { role: 'Deceased’s brother' }],
       description:
         'A widow says her late husband’s brother is claiming the family land and threatened her when she refused to leave the homestead.',
-      location: 'Kisumu, Kenya',
+      location: 'Zaria, Nigeria',
       referralFlag: true,
       referralReason: 'Threat mentioned alongside a land/inheritance dispute — escalating conflict, refer before continuing mediation.',
     },
@@ -154,27 +185,40 @@ async function seedExampleCases(prisma: PrismaClient) {
         referralFlag: ex.referralFlag,
         referralReason: ex.referralReason ?? undefined,
       },
-      update: {},
+      update: {
+        caseType: ex.caseType,
+        description: ex.description,
+        location: ex.location,
+        referralFlag: ex.referralFlag,
+        referralReason: ex.referralReason ?? undefined,
+      },
     });
   }
   console.log(`Seeded ${examples.length} example cases for mediator "${mediatorId}".`);
 }
 
 /**
- * Extra mediators/cases across several regions in both countries, purely so
- * `/stats/aggregate` (the anonymized cross-community tension-signal view)
- * has a realistic geographic spread to show instead of a single data point.
- * Dated within the last 30 days so they count toward the "recent" signal.
+ * Extra mediators/cases across several Nigerian states, purely so the admin
+ * case-overview dashboard has a realistic geographic spread to show instead
+ * of a single data point. Dated within the last 30 days so they count toward
+ * the "recent" escalation signal. Confined to Nigeria only — see README.
  */
 async function seedDashboardDemoData(prisma: PrismaClient) {
+  // Remove the old Kenya-based demo mediators/cases from a prior version of
+  // this seed script — the project is now scoped to Nigeria only.
+  const oldMediatorIds = ['dash-mediator-nairobi', 'dash-mediator-mombasa', 'dash-mediator-lagos', 'dash-mediator-kano'];
+  const oldCaseIds = ['dash-case-1', 'dash-case-2', 'dash-case-3', 'dash-case-4', 'dash-case-5', 'dash-case-6', 'dash-case-7', 'dash-case-8', 'dash-case-9'];
+  await prisma.case.deleteMany({ where: { id: { in: oldCaseIds } } });
+  await prisma.mediator.deleteMany({ where: { id: { in: oldMediatorIds } } });
+
   const passwordHash = await bcrypt.hash('password123', 10);
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 
   const mediators = [
-    { id: 'dash-mediator-nairobi', username: 'dash_nairobi', fullName: 'Nairobi Mediator', country: 'Kenya', region: 'Nairobi County', locality: 'Kibera' },
-    { id: 'dash-mediator-mombasa', username: 'dash_mombasa', fullName: 'Mombasa Mediator', country: 'Kenya', region: 'Mombasa County', locality: 'Nyali' },
     { id: 'dash-mediator-lagos', username: 'dash_lagos', fullName: 'Lagos Mediator', country: 'Nigeria', region: 'Lagos State', locality: 'Ikeja' },
     { id: 'dash-mediator-kano', username: 'dash_kano', fullName: 'Kano Mediator', country: 'Nigeria', region: 'Kano State', locality: 'Kano Municipal' },
+    { id: 'dash-mediator-rivers', username: 'dash_rivers', fullName: 'Rivers Mediator', country: 'Nigeria', region: 'Rivers State', locality: 'Port Harcourt' },
+    { id: 'dash-mediator-enugu', username: 'dash_enugu', fullName: 'Enugu Mediator', country: 'Nigeria', region: 'Enugu State', locality: 'Enugu' },
   ];
   for (const m of mediators) {
     await prisma.mediator.upsert({
@@ -193,19 +237,19 @@ async function seedDashboardDemoData(prisma: PrismaClient) {
     referralFlag: boolean;
   }
   const cases: DashCase[] = [
-    // Nairobi: high recent tension (2 escalating cases)
-    { id: 'dash-case-1', mediatorId: 'dash-mediator-nairobi', caseType: 'Neighbor dispute', location: 'Kibera, Nairobi', daysAgo: 3, referralFlag: true },
-    { id: 'dash-case-2', mediatorId: 'dash-mediator-nairobi', caseType: 'Land boundary', location: 'Kibera, Nairobi', daysAgo: 10, referralFlag: true },
-    { id: 'dash-case-3', mediatorId: 'dash-mediator-nairobi', caseType: 'Debt / property', location: 'Kibera, Nairobi', daysAgo: 20, referralFlag: false },
-    // Mombasa: quiet
-    { id: 'dash-case-4', mediatorId: 'dash-mediator-mombasa', caseType: 'Family / inheritance', location: 'Nyali, Mombasa', daysAgo: 15, referralFlag: false },
-    { id: 'dash-case-5', mediatorId: 'dash-mediator-mombasa', caseType: 'Neighbor dispute', location: 'Nyali, Mombasa', daysAgo: 25, referralFlag: false },
-    // Lagos: one escalating
-    { id: 'dash-case-6', mediatorId: 'dash-mediator-lagos', caseType: 'Land boundary', location: 'Ikeja, Lagos', daysAgo: 5, referralFlag: true },
-    { id: 'dash-case-7', mediatorId: 'dash-mediator-lagos', caseType: 'Domestic / marital', location: 'Ikeja, Lagos', daysAgo: 18, referralFlag: false },
+    // Lagos: high recent tension (2 escalating cases)
+    { id: 'dash-case-lagos-1', mediatorId: 'dash-mediator-lagos', caseType: 'Land boundary', location: 'Ikeja, Lagos', daysAgo: 4, referralFlag: true },
+    { id: 'dash-case-lagos-2', mediatorId: 'dash-mediator-lagos', caseType: 'Neighbor dispute', location: 'Ikeja, Lagos', daysAgo: 12, referralFlag: true },
+    { id: 'dash-case-lagos-3', mediatorId: 'dash-mediator-lagos', caseType: 'Domestic / marital', location: 'Ikeja, Lagos', daysAgo: 20, referralFlag: false },
     // Kano: high recent tension
-    { id: 'dash-case-8', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 2, referralFlag: true },
-    { id: 'dash-case-9', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 8, referralFlag: true },
+    { id: 'dash-case-kano-1', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 2, referralFlag: true },
+    { id: 'dash-case-kano-2', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 9, referralFlag: true },
+    // Rivers: quiet
+    { id: 'dash-case-rivers-1', mediatorId: 'dash-mediator-rivers', caseType: 'Family / inheritance', location: 'Port Harcourt', daysAgo: 15, referralFlag: false },
+    { id: 'dash-case-rivers-2', mediatorId: 'dash-mediator-rivers', caseType: 'Debt / property', location: 'Port Harcourt', daysAgo: 25, referralFlag: false },
+    // Enugu: one escalating
+    { id: 'dash-case-enugu-1', mediatorId: 'dash-mediator-enugu', caseType: 'Land boundary', location: 'Enugu', daysAgo: 6, referralFlag: true },
+    { id: 'dash-case-enugu-2', mediatorId: 'dash-mediator-enugu', caseType: 'Neighbor dispute', location: 'Enugu', daysAgo: 18, referralFlag: false },
   ];
 
   for (const c of cases) {
@@ -216,7 +260,7 @@ async function seedDashboardDemoData(prisma: PrismaClient) {
         mediatorId: c.mediatorId,
         caseType: c.caseType,
         parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
-        description: 'Placeholder demo case seeded for the aggregate tension-signal dashboard.',
+        description: 'Placeholder demo case seeded for the admin case-overview dashboard.',
         location: c.location,
         createdAt: daysAgo(c.daysAgo),
         syncedAt: daysAgo(c.daysAgo),
@@ -226,7 +270,7 @@ async function seedDashboardDemoData(prisma: PrismaClient) {
       update: {},
     });
   }
-  console.log(`Seeded ${mediators.length} more mediators / ${cases.length} cases across regions for the dashboard demo.`);
+  console.log(`Seeded ${mediators.length} more mediators / ${cases.length} cases across Nigerian states for the admin dashboard demo.`);
 }
 
 main().catch((err) => {

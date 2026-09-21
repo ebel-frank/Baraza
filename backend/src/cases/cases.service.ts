@@ -147,4 +147,52 @@ export class CasesService {
           a.caseType.localeCompare(b.caseType),
       );
   }
+
+  /**
+   * Full, unanonymized case list for the overseeing-institution admin dashboard —
+   * unlike aggregateByTypeAndRegion(), this deliberately exposes real case content
+   * (description, parties, location) so a government/NGO admin can see exactly
+   * what's arising and where. Gated by AdminGuard, never reachable by a mediator's
+   * own token.
+   */
+  async adminCaseOverview() {
+    const [cases, mediators] = await Promise.all([
+      this.prisma.case.findMany({ orderBy: { createdAt: 'desc' } }),
+      this.prisma.mediator.findMany({ select: { id: true, fullName: true, region: true, locality: true } }),
+    ]);
+    const mediatorInfo = new Map(mediators.map((m) => [m.id, m]));
+
+    const casesWithContext = cases.map((c) => {
+      const mediator = mediatorInfo.get(c.mediatorId);
+      return {
+        id: c.id,
+        caseType: c.caseType,
+        parties: c.parties,
+        description: c.description,
+        location: c.location,
+        createdAt: c.createdAt.toISOString(),
+        referralFlag: c.referralFlag,
+        referralReason: c.referralReason,
+        mediatorName: mediator?.fullName ?? 'Unknown mediator',
+        region: mediator?.region ?? 'Unknown region',
+        locality: mediator?.locality ?? 'Unknown locality',
+      };
+    });
+
+    const regionTotals = new Map<string, { region: string; count: number; referralFlagCount: number }>();
+    for (const c of casesWithContext) {
+      let r = regionTotals.get(c.region);
+      if (!r) {
+        r = { region: c.region, count: 0, referralFlagCount: 0 };
+        regionTotals.set(c.region, r);
+      }
+      r.count += 1;
+      if (c.referralFlag) r.referralFlagCount += 1;
+    }
+
+    return {
+      regions: [...regionTotals.values()].sort((a, b) => b.count - a.count),
+      cases: casesWithContext,
+    };
+  }
 }

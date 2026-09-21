@@ -14,6 +14,7 @@ export interface PublicMediator {
   country: string;
   region: string;
   locality: string;
+  role: string;
 }
 
 export interface AuthResult {
@@ -65,7 +66,11 @@ export class AuthService {
   }
 
   private signToken(mediator: Mediator): string {
-    return this.jwtService.sign({ sub: mediator.id, username: mediator.username });
+    return this.jwtService.sign({
+      sub: mediator.id,
+      username: mediator.username,
+      role: mediator.role ?? 'mediator',
+    });
   }
 
   private toPublic(mediator: Mediator): PublicMediator {
@@ -76,6 +81,7 @@ export class AuthService {
       country: mediator.country,
       region: mediator.region,
       locality: mediator.locality,
+      role: mediator.role ?? 'mediator',
     };
   }
 }

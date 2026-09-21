@@ -7,6 +7,7 @@ class MediatorProfile {
   final String country;
   final String region;
   final String locality;
+  final String role;
 
   MediatorProfile({
     required this.id,
@@ -15,7 +16,10 @@ class MediatorProfile {
     required this.country,
     required this.region,
     required this.locality,
+    this.role = 'mediator',
   });
+
+  bool get isAdmin => role == 'admin';
 
   factory MediatorProfile.fromJson(Map<String, dynamic> json) => MediatorProfile(
         id: json['id'] as String,
@@ -24,6 +28,7 @@ class MediatorProfile {
         country: json['country'] as String,
         region: json['region'] as String,
         locality: json['locality'] as String,
+        role: json['role'] as String? ?? 'mediator',
       );
 
   Map<String, dynamic> toJson() => {
@@ -33,5 +38,6 @@ class MediatorProfile {
         'country': country,
         'region': region,
         'locality': locality,
+        'role': role,
       };
 }

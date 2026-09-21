@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_services.dart';
+import 'screens/admin_dashboard_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'services/auth_session_service.dart';
@@ -47,6 +48,9 @@ class _BarazaAppState extends State<BarazaApp> {
           final session = snapshot.data;
           if (session == null) {
             return SignInScreen(services: _services);
+          }
+          if (session.profile.isAdmin) {
+            return AdminDashboardScreen(services: _services);
           }
           return HomeScreen(services: _services, mediator: session.profile);
         },

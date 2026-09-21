@@ -5,8 +5,9 @@ import { CasesModule } from './cases/cases.module';
 import { AdvisoryModule } from './advisory/advisory.module';
 import { ReferralModule } from './referral/referral.module';
 import { HealthModule } from './health/health.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, CasesModule, AdvisoryModule, ReferralModule, HealthModule],
+  imports: [PrismaModule, AuthModule, CasesModule, AdvisoryModule, ReferralModule, HealthModule, AdminModule],
 })
 export class AppModule {}

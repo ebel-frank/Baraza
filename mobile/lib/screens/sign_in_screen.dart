@@ -6,6 +6,7 @@ import '../constants/dev_flags.dart';
 import '../services/auth_api_client.dart';
 import '../services/mediator_profile_service.dart';
 import '../widgets/auth_header.dart';
+import 'admin_dashboard_screen.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
@@ -51,18 +52,13 @@ class _SignInScreenState extends State<SignInScreen> {
         id: 'local-$username',
         username: username,
         fullName: username,
-        country: 'Kenya',
+        country: 'Nigeria',
         region: 'N/A',
         locality: 'N/A',
       );
       await widget.services.authSessionService.saveSession('dev-bypass-token', profile);
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(services: widget.services, mediator: profile),
-        ),
-        (route) => false,
-      );
+      _navigateAfterLogin(profile);
       return;
     }
 
@@ -72,20 +68,28 @@ class _SignInScreenState extends State<SignInScreen> {
         password: _passwordController.text,
       );
       await widget.services.authSessionService.saveSession(result.token, result.profile);
-      // Recover any cases already synced under this account (e.g. a new/reinstalled app).
-      await widget.services.syncService.pullFromServer();
+      if (!result.profile.isAdmin) {
+        // Recover any cases already synced under this account (e.g. a new/reinstalled app).
+        await widget.services.syncService.pullFromServer();
+      }
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(services: widget.services, mediator: result.profile),
-        ),
-        (route) => false,
-      );
+      _navigateAfterLogin(result.profile);
     } on AuthApiException catch (e) {
       setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  void _navigateAfterLogin(MediatorProfile profile) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => profile.isAdmin
+            ? AdminDashboardScreen(services: widget.services)
+            : HomeScreen(services: widget.services, mediator: profile),
+      ),
+      (route) => false,
+    );
   }
 
   void _goToRegister() {
@@ -172,6 +176,18 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: TextButton(
+                          onPressed: _saving
+                              ? null
+                              : () {
+                                  _usernameController.text = kAdminUsername;
+                                  _passwordController.text = kAdminPassword;
+                                },
+                          child: const Text('Signing in as the overseeing institution? Use the admin demo account'),
+                        ),
                       ),
                     ],
                   ),

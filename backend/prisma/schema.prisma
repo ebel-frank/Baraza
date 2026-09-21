@@ -22,6 +22,11 @@ model Mediator {
   region       String
   locality     String
   createdAt    DateTime @default(now())
+  // Nullable rather than a non-optional default — MongoDB documents created
+  // before this field existed don't have it in storage, and a non-optional
+  // field would fail to deserialize on read for those existing rows. Treat
+  // null as "mediator" in application code.
+  role         String?
 
   @@map("mediators")
 }
