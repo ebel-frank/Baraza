@@ -53,12 +53,18 @@ async function main() {
     process.env.GEMINI_GENERATION_MODEL ?? 'gemini-2.5-flash',
   );
 
+  // Full wipe — this is a hackathon demo database, not real user data, so a
+  // clean reseed (rather than incremental upserts) is the simplest way to
+  // guarantee every record is current and confined to Nigeria.
+  await prisma.case.deleteMany({});
+  await prisma.mediator.deleteMany({});
+  await prisma.documentChunk.deleteMany({});
+  console.log('Cleared all existing cases, mediators, and document chunks.');
+
   const seedDir = path.join(__dirname, '..', '..', 'seed_data');
   const files = fs.readdirSync(seedDir).filter((f) => f.endsWith('.txt'));
 
   console.log(`Found ${files.length} seed documents in ${seedDir}`);
-
-  await prisma.documentChunk.deleteMany({});
 
   let total = 0;
   for (const file of files) {
@@ -204,13 +210,6 @@ async function seedExampleCases(prisma: PrismaClient) {
  * the "recent" escalation signal. Confined to Nigeria only — see README.
  */
 async function seedDashboardDemoData(prisma: PrismaClient) {
-  // Remove the old Kenya-based demo mediators/cases from a prior version of
-  // this seed script — the project is now scoped to Nigeria only.
-  const oldMediatorIds = ['dash-mediator-nairobi', 'dash-mediator-mombasa', 'dash-mediator-lagos', 'dash-mediator-kano'];
-  const oldCaseIds = ['dash-case-1', 'dash-case-2', 'dash-case-3', 'dash-case-4', 'dash-case-5', 'dash-case-6', 'dash-case-7', 'dash-case-8', 'dash-case-9'];
-  await prisma.case.deleteMany({ where: { id: { in: oldCaseIds } } });
-  await prisma.mediator.deleteMany({ where: { id: { in: oldMediatorIds } } });
-
   const passwordHash = await bcrypt.hash('password123', 10);
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 

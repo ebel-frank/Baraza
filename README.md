@@ -20,10 +20,9 @@ over completeness, security hardening, or production data handling. See
   regains connectivity, or on demand via "Sync now". Sync never blocks the UI
   and never deletes/loses a local case.
 - Looks up relevant law/policy for a case via retrieval-augmented search over a
-  small seeded corpus (Kenya AJS Policy, Kenya land/succession/family Act
-  excerpts, Nigeria Land Use Act, NigeriaLII customary court excerpts) and
-  returns a short, **cited** summary — never a free-form LLM answer with no
-  source. If the case has voice-note recordings, they're sent to Gemini
+  small seeded corpus (Nigeria Land Use Act excerpts, NigeriaLII customary
+  court practice excerpts) and returns a short, **cited** summary — never a
+  free-form LLM answer with no source. If the case has voice-note recordings, they're sent to Gemini
   alongside the text so the summary can factor in tone/detail the
   transcription might have missed — but citations still only ever come from
   the seeded corpus, never invented from the audio.

@@ -12,21 +12,21 @@
       "id": "escalating_violence",
       "label": "Escalating conflict or violence",
       "reason": "The description mentions threats, violence, or physical harm, which is outside the scope of informal mediation.",
-      "suggestedNextStep": "Refer to the local chief's office or police (Kenya) / relevant law enforcement (Nigeria) before any further mediation session.",
-      "keywords": ["threatened", "threat", "assault", "attacked", "beaten", "injury", "injured", "weapon", "panga", "machete", "violence", "violent", "fight broke out", "burned", "arson", "killed", "death threat"]
+      "suggestedNextStep": "Refer to the nearest police station or relevant law enforcement before any further mediation session.",
+      "keywords": ["threatened", "threat", "assault", "attacked", "beaten", "injury", "injured", "weapon", "machete", "violence", "violent", "fight broke out", "burned", "arson", "killed", "death threat"]
     },
     {
       "id": "land_title_dispute",
       "label": "Formal land title / ownership dispute",
       "reason": "This involves a registered land title or formal ownership dispute, which typically requires the land registry or courts, not informal mediation.",
-      "suggestedNextStep": "Refer to the Ministry of Lands / Land Registrar (Kenya) or the Land Use Act allocation authority (Nigeria) for title verification.",
+      "suggestedNextStep": "Refer to the Land Registry or the relevant Land Use Act allocation authority for title verification.",
       "keywords": ["title deed", "land certificate", "registrar of titles", "certificate of occupancy", "land registry", "survey beacon", "boundary dispute over registered", "fraudulent transfer", "forged title"]
     },
     {
       "id": "child_protection",
       "label": "Child protection concern",
       "reason": "The description raises a possible child welfare or protection concern, which is outside mediation's normal scope.",
-      "suggestedNextStep": "Refer to the Children's Officer (Kenya) or the relevant social welfare office (Nigeria) rather than continuing informal mediation.",
+      "suggestedNextStep": "Refer to the relevant social welfare office rather than continuing informal mediation.",
       "keywords": ["child abuse", "minor was", "underage", "defilement", "child marriage", "child labor", "neglected child", "orphan inheritance dispute"]
     },
     {
