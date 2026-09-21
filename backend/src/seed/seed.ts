@@ -83,6 +83,7 @@ async function main() {
   console.log(`Seeded ${total} document chunks with embeddings.`);
 
   await seedExampleCases(prisma);
+  await seedDashboardDemoData(prisma);
 
   await prisma.$disconnect();
 }
@@ -157,6 +158,75 @@ async function seedExampleCases(prisma: PrismaClient) {
     });
   }
   console.log(`Seeded ${examples.length} example cases for mediator "${mediatorId}".`);
+}
+
+/**
+ * Extra mediators/cases across several regions in both countries, purely so
+ * `/stats/aggregate` (the anonymized cross-community tension-signal view)
+ * has a realistic geographic spread to show instead of a single data point.
+ * Dated within the last 30 days so they count toward the "recent" signal.
+ */
+async function seedDashboardDemoData(prisma: PrismaClient) {
+  const passwordHash = await bcrypt.hash('password123', 10);
+  const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
+
+  const mediators = [
+    { id: 'dash-mediator-nairobi', username: 'dash_nairobi', fullName: 'Nairobi Mediator', country: 'Kenya', region: 'Nairobi County', locality: 'Kibera' },
+    { id: 'dash-mediator-mombasa', username: 'dash_mombasa', fullName: 'Mombasa Mediator', country: 'Kenya', region: 'Mombasa County', locality: 'Nyali' },
+    { id: 'dash-mediator-lagos', username: 'dash_lagos', fullName: 'Lagos Mediator', country: 'Nigeria', region: 'Lagos State', locality: 'Ikeja' },
+    { id: 'dash-mediator-kano', username: 'dash_kano', fullName: 'Kano Mediator', country: 'Nigeria', region: 'Kano State', locality: 'Kano Municipal' },
+  ];
+  for (const m of mediators) {
+    await prisma.mediator.upsert({
+      where: { id: m.id },
+      create: { ...m, passwordHash },
+      update: {},
+    });
+  }
+
+  interface DashCase {
+    id: string;
+    mediatorId: string;
+    caseType: string;
+    location: string;
+    daysAgo: number;
+    referralFlag: boolean;
+  }
+  const cases: DashCase[] = [
+    // Nairobi: high recent tension (2 escalating cases)
+    { id: 'dash-case-1', mediatorId: 'dash-mediator-nairobi', caseType: 'Neighbor dispute', location: 'Kibera, Nairobi', daysAgo: 3, referralFlag: true },
+    { id: 'dash-case-2', mediatorId: 'dash-mediator-nairobi', caseType: 'Land boundary', location: 'Kibera, Nairobi', daysAgo: 10, referralFlag: true },
+    { id: 'dash-case-3', mediatorId: 'dash-mediator-nairobi', caseType: 'Debt / property', location: 'Kibera, Nairobi', daysAgo: 20, referralFlag: false },
+    // Mombasa: quiet
+    { id: 'dash-case-4', mediatorId: 'dash-mediator-mombasa', caseType: 'Family / inheritance', location: 'Nyali, Mombasa', daysAgo: 15, referralFlag: false },
+    { id: 'dash-case-5', mediatorId: 'dash-mediator-mombasa', caseType: 'Neighbor dispute', location: 'Nyali, Mombasa', daysAgo: 25, referralFlag: false },
+    // Lagos: one escalating
+    { id: 'dash-case-6', mediatorId: 'dash-mediator-lagos', caseType: 'Land boundary', location: 'Ikeja, Lagos', daysAgo: 5, referralFlag: true },
+    { id: 'dash-case-7', mediatorId: 'dash-mediator-lagos', caseType: 'Domestic / marital', location: 'Ikeja, Lagos', daysAgo: 18, referralFlag: false },
+    // Kano: high recent tension
+    { id: 'dash-case-8', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 2, referralFlag: true },
+    { id: 'dash-case-9', mediatorId: 'dash-mediator-kano', caseType: 'Neighbor dispute', location: 'Kano Municipal', daysAgo: 8, referralFlag: true },
+  ];
+
+  for (const c of cases) {
+    await prisma.case.upsert({
+      where: { id: c.id },
+      create: {
+        id: c.id,
+        mediatorId: c.mediatorId,
+        caseType: c.caseType,
+        parties: [{ role: 'Complainant' }, { role: 'Neighbor' }],
+        description: 'Placeholder demo case seeded for the aggregate tension-signal dashboard.',
+        location: c.location,
+        createdAt: daysAgo(c.daysAgo),
+        syncedAt: daysAgo(c.daysAgo),
+        referralFlag: c.referralFlag,
+        referralReason: c.referralFlag ? 'Seeded demo escalation signal.' : undefined,
+      },
+      update: {},
+    });
+  }
+  console.log(`Seeded ${mediators.length} more mediators / ${cases.length} cases across regions for the dashboard demo.`);
 }
 
 main().catch((err) => {

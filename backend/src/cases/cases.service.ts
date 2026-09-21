@@ -75,32 +75,76 @@ export class CasesService {
   }
 
   /**
-   * Anonymized counts for the stretch-goal read-only dashboard. Grouped in
-   * application code rather than a DB-side join — Mongo has no cross-collection
-   * joins via Prisma, and the case/mediator counts here are small enough that
-   * this is simpler than an aggregation pipeline.
+   * Anonymized, aggregate-only tension signal: never exposes a single case's
+   * description/parties, only counts grouped by country/region/case type —
+   * this is what lets mediators and coordinators across different
+   * communities compare notes ("is this pattern local, or wider?") without
+   * either side seeing the other's actual case data. `riskLevel` is a plain,
+   * explicit threshold on recent referral-flagged (escalating) cases, not a
+   * hidden model — same "editable config, not a black box" principle as the
+   * referral categories themselves.
+   *
+   * Grouped in application code rather than a DB-side join — Mongo has no
+   * cross-collection joins via Prisma, and the counts here are small enough
+   * that this is simpler than an aggregation pipeline.
    */
   async aggregateByTypeAndRegion() {
     const [cases, mediators] = await Promise.all([
-      this.prisma.case.findMany({ select: { mediatorId: true, caseType: true } }),
-      this.prisma.mediator.findMany({ select: { id: true, region: true } }),
+      this.prisma.case.findMany({
+        select: { mediatorId: true, caseType: true, referralFlag: true, createdAt: true },
+      }),
+      this.prisma.mediator.findMany({ select: { id: true, region: true, country: true } }),
     ]);
-    const regionByMediatorId = new Map(mediators.map((m) => [m.id, m.region]));
+    const mediatorInfo = new Map(mediators.map((m) => [m.id, { region: m.region, country: m.country }]));
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    const counts = new Map<string, { caseType: string; region: string; count: number }>();
+    interface Group {
+      country: string;
+      region: string;
+      caseType: string;
+      count: number;
+      referralFlagCount: number;
+      recentCount: number;
+      recentReferralFlagCount: number;
+    }
+    const groups = new Map<string, Group>();
     for (const c of cases) {
-      const region = regionByMediatorId.get(c.mediatorId) ?? 'Unknown';
-      const key = `${c.caseType}::${region}`;
-      const existing = counts.get(key);
-      if (existing) {
-        existing.count += 1;
-      } else {
-        counts.set(key, { caseType: c.caseType, region, count: 1 });
+      const info = mediatorInfo.get(c.mediatorId) ?? { region: 'Unknown', country: 'Unknown' };
+      const key = `${info.country}::${info.region}::${c.caseType}`;
+      let g = groups.get(key);
+      if (!g) {
+        g = {
+          country: info.country,
+          region: info.region,
+          caseType: c.caseType,
+          count: 0,
+          referralFlagCount: 0,
+          recentCount: 0,
+          recentReferralFlagCount: 0,
+        };
+        groups.set(key, g);
+      }
+      g.count += 1;
+      if (c.referralFlag) g.referralFlagCount += 1;
+      if (c.createdAt >= thirtyDaysAgo) {
+        g.recentCount += 1;
+        if (c.referralFlag) g.recentReferralFlagCount += 1;
       }
     }
 
-    return [...counts.values()].sort(
-      (a, b) => a.region.localeCompare(b.region) || a.caseType.localeCompare(b.caseType),
-    );
+    return [...groups.values()]
+      .map((g) => ({
+        ...g,
+        // Explicit thresholds on recent escalating cases — recorded here, not
+        // hidden in a model, so a coordinator can see exactly why a region
+        // is flagged. Tune freely as real data comes in.
+        riskLevel: g.recentReferralFlagCount >= 2 ? 'high' : g.recentReferralFlagCount >= 1 ? 'medium' : 'low',
+      }))
+      .sort(
+        (a, b) =>
+          a.country.localeCompare(b.country) ||
+          a.region.localeCompare(b.region) ||
+          a.caseType.localeCompare(b.caseType),
+      );
   }
 }
