@@ -155,6 +155,9 @@ async function seedExampleCases(prisma: PrismaClient) {
       location: 'Kaduna, Nigeria',
       referralFlag: false,
       referralReason: null,
+      closedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      resolutionNote:
+        'A neutral elder from a neighboring village walked the boundary with both farmers and the original thorn hedge line. Both agreed to restore the fence to that line and mark it with new boundary stones. No further dispute reported.',
     },
     {
       id: 'demo-case-2',
@@ -205,6 +208,9 @@ async function seedExampleCases(prisma: PrismaClient) {
       location: 'Jos, Nigeria',
       referralFlag: false,
       referralReason: null,
+      closedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      resolutionNote:
+        'Settled on a compensation figure between the farmer\'s asking price and the herder\'s initial offer, based on the neutral farmer\'s estimate of the damaged area. Herder paid in full at the session.',
     },
     {
       id: 'demo-case-7',
@@ -262,6 +268,8 @@ async function seedExampleCases(prisma: PrismaClient) {
         syncedAt: new Date(),
         referralFlag: ex.referralFlag,
         referralReason: ex.referralReason ?? undefined,
+        closedAt: (ex as { closedAt?: Date }).closedAt ?? undefined,
+        resolutionNote: (ex as { resolutionNote?: string }).resolutionNote ?? undefined,
       },
       update: {
         caseType: ex.caseType,
@@ -269,6 +277,8 @@ async function seedExampleCases(prisma: PrismaClient) {
         location: ex.location,
         referralFlag: ex.referralFlag,
         referralReason: ex.referralReason ?? undefined,
+        closedAt: (ex as { closedAt?: Date }).closedAt ?? null,
+        resolutionNote: (ex as { resolutionNote?: string }).resolutionNote ?? null,
       },
     });
   }

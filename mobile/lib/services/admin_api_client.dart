@@ -17,6 +17,8 @@ class AdminCase {
   final String mediatorName;
   final String region;
   final String locality;
+  final String? closedAt;
+  final String? resolutionNote;
 
   AdminCase({
     required this.id,
@@ -30,6 +32,8 @@ class AdminCase {
     required this.mediatorName,
     required this.region,
     required this.locality,
+    required this.closedAt,
+    required this.resolutionNote,
   });
 
   factory AdminCase.fromJson(Map<String, dynamic> json) => AdminCase(
@@ -44,6 +48,8 @@ class AdminCase {
     mediatorName: json['mediatorName'] as String,
     region: json['region'] as String,
     locality: json['locality'] as String,
+    closedAt: json['closedAt'] as String?,
+    resolutionNote: json['resolutionNote'] as String?,
   );
 }
 

@@ -49,6 +49,11 @@ model Case {
   referralFlag     Boolean   @default(false)
   referralReason   String?
   advisoryResponse Json?
+  // A case is open while closedAt is null. resolutionNote is a short record
+  // of what actually worked — the whole point of keeping a shared record
+  // instead of relying on a mediator's memory.
+  closedAt         DateTime?
+  resolutionNote   String?
 
   @@map("cases")
 }

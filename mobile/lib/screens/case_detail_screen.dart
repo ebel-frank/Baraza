@@ -62,6 +62,73 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     await _audioPlayerService.play(path);
   }
 
+  Future<void> _closeCase(Case caseRecord) async {
+    final controller = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Close this case?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Optionally record what actually resolved it, for future reference.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'What worked (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Close case'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final note = controller.text.trim();
+    await widget.services.db.closeCase(
+      caseRecord.id,
+      resolutionNote: note.isEmpty ? null : note,
+    );
+  }
+
+  Future<void> _reopenCase(Case caseRecord) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Reopen this case?'),
+        content: const Text('This clears its resolution note.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Reopen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await widget.services.db.reopenCase(caseRecord.id);
+  }
+
   void _openGuidance(Case caseRecord, AdvisoryResult advisory) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -170,6 +237,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                       text: DateFormat.yMMMd().format(caseRecord.createdAt),
                     ),
                     _SyncBadge(synced: caseRecord.syncedAt != null),
+                    _StatusBadge(closed: caseRecord.closedAt != null),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -213,7 +281,53 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                     const SizedBox(height: 6),
                   ],
                 ],
+                if (caseRecord.closedAt != null) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    'Resolved',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Closed ${DateFormat.yMMMd().format(caseRecord.closedAt!)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  if (caseRecord.resolutionNote != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: RiskColors.of(context, 'low').bg,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        caseRecord.resolutionNote!,
+                        style: TextStyle(
+                          color: RiskColors.of(context, 'low').fg,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
                 const SizedBox(height: 20),
+                OutlinedButton.icon(
+                  onPressed: caseRecord.closedAt != null
+                      ? () => _reopenCase(caseRecord)
+                      : () => _closeCase(caseRecord),
+                  icon: Icon(
+                    caseRecord.closedAt != null
+                        ? Icons.replay_rounded
+                        : Icons.check_circle_outline_rounded,
+                  ),
+                  label: Text(
+                    caseRecord.closedAt != null
+                        ? 'Reopen case'
+                        : 'Mark case closed',
+                  ),
+                ),
+                const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: _loadingAdvisory
                       ? null
@@ -289,6 +403,40 @@ class _MetaItem extends StatelessWidget {
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final bool closed;
+  const _StatusBadge({required this.closed});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = closed
+        ? RiskColors.of(context, 'low').fg
+        : scheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          closed
+              ? Icons.check_circle_outline_rounded
+              : Icons.hourglass_top_rounded,
+          size: 15,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          closed ? 'Closed' : 'Open',
+          style: TextStyle(
+            fontSize: 13,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

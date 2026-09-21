@@ -502,6 +502,7 @@ class _AdminCaseCard extends StatelessWidget {
                               icon: Icons.event_outlined,
                               text: DateFormat.yMMMd().format(date),
                             ),
+                          if (caseData.closedAt != null) _ClosedBadge(),
                         ],
                       ),
                       if (caseData.referralFlag &&
@@ -529,6 +530,28 @@ class _AdminCaseCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ClosedBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final risk = RiskColors.of(context, 'low');
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: risk.bg,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        'Closed',
+        style: TextStyle(
+          color: risk.fg,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

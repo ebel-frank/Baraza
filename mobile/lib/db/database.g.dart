@@ -132,6 +132,28 @@ class $CasesTable extends Cases with TableInfo<$CasesTable, Case> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resolutionNoteMeta = const VerificationMeta(
+    'resolutionNote',
+  );
+  @override
+  late final GeneratedColumn<String> resolutionNote = GeneratedColumn<String>(
+    'resolution_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -145,6 +167,8 @@ class $CasesTable extends Cases with TableInfo<$CasesTable, Case> {
     referralFlag,
     referralReason,
     advisoryResponseJson,
+    closedAt,
+    resolutionNote,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -251,6 +275,21 @@ class $CasesTable extends Cases with TableInfo<$CasesTable, Case> {
         ),
       );
     }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('resolution_note')) {
+      context.handle(
+        _resolutionNoteMeta,
+        resolutionNote.isAcceptableOrUnknown(
+          data['resolution_note']!,
+          _resolutionNoteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -304,6 +343,14 @@ class $CasesTable extends Cases with TableInfo<$CasesTable, Case> {
         DriftSqlType.string,
         data['${effectivePrefix}advisory_response_json'],
       ),
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      resolutionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolution_note'],
+      ),
     );
   }
 
@@ -325,6 +372,8 @@ class Case extends DataClass implements Insertable<Case> {
   final bool referralFlag;
   final String? referralReason;
   final String? advisoryResponseJson;
+  final DateTime? closedAt;
+  final String? resolutionNote;
   const Case({
     required this.id,
     required this.caseType,
@@ -337,6 +386,8 @@ class Case extends DataClass implements Insertable<Case> {
     required this.referralFlag,
     this.referralReason,
     this.advisoryResponseJson,
+    this.closedAt,
+    this.resolutionNote,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -359,6 +410,12 @@ class Case extends DataClass implements Insertable<Case> {
     }
     if (!nullToAbsent || advisoryResponseJson != null) {
       map['advisory_response_json'] = Variable<String>(advisoryResponseJson);
+    }
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    if (!nullToAbsent || resolutionNote != null) {
+      map['resolution_note'] = Variable<String>(resolutionNote);
     }
     return map;
   }
@@ -384,6 +441,12 @@ class Case extends DataClass implements Insertable<Case> {
       advisoryResponseJson: advisoryResponseJson == null && nullToAbsent
           ? const Value.absent()
           : Value(advisoryResponseJson),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      resolutionNote: resolutionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolutionNote),
     );
   }
 
@@ -408,6 +471,8 @@ class Case extends DataClass implements Insertable<Case> {
       advisoryResponseJson: serializer.fromJson<String?>(
         json['advisoryResponseJson'],
       ),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      resolutionNote: serializer.fromJson<String?>(json['resolutionNote']),
     );
   }
   @override
@@ -425,6 +490,8 @@ class Case extends DataClass implements Insertable<Case> {
       'referralFlag': serializer.toJson<bool>(referralFlag),
       'referralReason': serializer.toJson<String?>(referralReason),
       'advisoryResponseJson': serializer.toJson<String?>(advisoryResponseJson),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'resolutionNote': serializer.toJson<String?>(resolutionNote),
     };
   }
 
@@ -440,6 +507,8 @@ class Case extends DataClass implements Insertable<Case> {
     bool? referralFlag,
     Value<String?> referralReason = const Value.absent(),
     Value<String?> advisoryResponseJson = const Value.absent(),
+    Value<DateTime?> closedAt = const Value.absent(),
+    Value<String?> resolutionNote = const Value.absent(),
   }) => Case(
     id: id ?? this.id,
     caseType: caseType ?? this.caseType,
@@ -458,6 +527,10 @@ class Case extends DataClass implements Insertable<Case> {
     advisoryResponseJson: advisoryResponseJson.present
         ? advisoryResponseJson.value
         : this.advisoryResponseJson,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    resolutionNote: resolutionNote.present
+        ? resolutionNote.value
+        : this.resolutionNote,
   );
   Case copyWithCompanion(CasesCompanion data) {
     return Case(
@@ -484,6 +557,10 @@ class Case extends DataClass implements Insertable<Case> {
       advisoryResponseJson: data.advisoryResponseJson.present
           ? data.advisoryResponseJson.value
           : this.advisoryResponseJson,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      resolutionNote: data.resolutionNote.present
+          ? data.resolutionNote.value
+          : this.resolutionNote,
     );
   }
 
@@ -500,7 +577,9 @@ class Case extends DataClass implements Insertable<Case> {
           ..write('syncedAt: $syncedAt, ')
           ..write('referralFlag: $referralFlag, ')
           ..write('referralReason: $referralReason, ')
-          ..write('advisoryResponseJson: $advisoryResponseJson')
+          ..write('advisoryResponseJson: $advisoryResponseJson, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('resolutionNote: $resolutionNote')
           ..write(')'))
         .toString();
   }
@@ -518,6 +597,8 @@ class Case extends DataClass implements Insertable<Case> {
     referralFlag,
     referralReason,
     advisoryResponseJson,
+    closedAt,
+    resolutionNote,
   );
   @override
   bool operator ==(Object other) =>
@@ -533,7 +614,9 @@ class Case extends DataClass implements Insertable<Case> {
           other.syncedAt == this.syncedAt &&
           other.referralFlag == this.referralFlag &&
           other.referralReason == this.referralReason &&
-          other.advisoryResponseJson == this.advisoryResponseJson);
+          other.advisoryResponseJson == this.advisoryResponseJson &&
+          other.closedAt == this.closedAt &&
+          other.resolutionNote == this.resolutionNote);
 }
 
 class CasesCompanion extends UpdateCompanion<Case> {
@@ -548,6 +631,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
   final Value<bool> referralFlag;
   final Value<String?> referralReason;
   final Value<String?> advisoryResponseJson;
+  final Value<DateTime?> closedAt;
+  final Value<String?> resolutionNote;
   final Value<int> rowid;
   const CasesCompanion({
     this.id = const Value.absent(),
@@ -561,6 +646,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
     this.referralFlag = const Value.absent(),
     this.referralReason = const Value.absent(),
     this.advisoryResponseJson = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.resolutionNote = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CasesCompanion.insert({
@@ -575,6 +662,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
     this.referralFlag = const Value.absent(),
     this.referralReason = const Value.absent(),
     this.advisoryResponseJson = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.resolutionNote = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        caseType = Value(caseType),
@@ -594,6 +683,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
     Expression<bool>? referralFlag,
     Expression<String>? referralReason,
     Expression<String>? advisoryResponseJson,
+    Expression<DateTime>? closedAt,
+    Expression<String>? resolutionNote,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -609,6 +700,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
       if (referralReason != null) 'referral_reason': referralReason,
       if (advisoryResponseJson != null)
         'advisory_response_json': advisoryResponseJson,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (resolutionNote != null) 'resolution_note': resolutionNote,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -625,6 +718,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
     Value<bool>? referralFlag,
     Value<String?>? referralReason,
     Value<String?>? advisoryResponseJson,
+    Value<DateTime?>? closedAt,
+    Value<String?>? resolutionNote,
     Value<int>? rowid,
   }) {
     return CasesCompanion(
@@ -639,6 +734,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
       referralFlag: referralFlag ?? this.referralFlag,
       referralReason: referralReason ?? this.referralReason,
       advisoryResponseJson: advisoryResponseJson ?? this.advisoryResponseJson,
+      closedAt: closedAt ?? this.closedAt,
+      resolutionNote: resolutionNote ?? this.resolutionNote,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -681,6 +778,12 @@ class CasesCompanion extends UpdateCompanion<Case> {
         advisoryResponseJson.value,
       );
     }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (resolutionNote.present) {
+      map['resolution_note'] = Variable<String>(resolutionNote.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -701,6 +804,8 @@ class CasesCompanion extends UpdateCompanion<Case> {
           ..write('referralFlag: $referralFlag, ')
           ..write('referralReason: $referralReason, ')
           ..write('advisoryResponseJson: $advisoryResponseJson, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('resolutionNote: $resolutionNote, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -731,6 +836,8 @@ typedef $$CasesTableCreateCompanionBuilder =
       Value<bool> referralFlag,
       Value<String?> referralReason,
       Value<String?> advisoryResponseJson,
+      Value<DateTime?> closedAt,
+      Value<String?> resolutionNote,
       Value<int> rowid,
     });
 typedef $$CasesTableUpdateCompanionBuilder =
@@ -746,6 +853,8 @@ typedef $$CasesTableUpdateCompanionBuilder =
       Value<bool> referralFlag,
       Value<String?> referralReason,
       Value<String?> advisoryResponseJson,
+      Value<DateTime?> closedAt,
+      Value<String?> resolutionNote,
       Value<int> rowid,
     });
 
@@ -809,6 +918,16 @@ class $$CasesTableFilterComposer extends Composer<_$AppDatabase, $CasesTable> {
 
   ColumnFilters<String> get advisoryResponseJson => $composableBuilder(
     column: $table.advisoryResponseJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resolutionNote => $composableBuilder(
+    column: $table.resolutionNote,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -876,6 +995,16 @@ class $$CasesTableOrderingComposer
     column: $table.advisoryResponseJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resolutionNote => $composableBuilder(
+    column: $table.resolutionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CasesTableAnnotationComposer
@@ -931,6 +1060,14 @@ class $$CasesTableAnnotationComposer
     column: $table.advisoryResponseJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get resolutionNote => $composableBuilder(
+    column: $table.resolutionNote,
+    builder: (column) => column,
+  );
 }
 
 class $$CasesTableTableManager
@@ -972,6 +1109,8 @@ class $$CasesTableTableManager
                 Value<bool> referralFlag = const Value.absent(),
                 Value<String?> referralReason = const Value.absent(),
                 Value<String?> advisoryResponseJson = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<String?> resolutionNote = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CasesCompanion(
                 id: id,
@@ -985,6 +1124,8 @@ class $$CasesTableTableManager
                 referralFlag: referralFlag,
                 referralReason: referralReason,
                 advisoryResponseJson: advisoryResponseJson,
+                closedAt: closedAt,
+                resolutionNote: resolutionNote,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1000,6 +1141,8 @@ class $$CasesTableTableManager
                 Value<bool> referralFlag = const Value.absent(),
                 Value<String?> referralReason = const Value.absent(),
                 Value<String?> advisoryResponseJson = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<String?> resolutionNote = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CasesCompanion.insert(
                 id: id,
@@ -1013,6 +1156,8 @@ class $$CasesTableTableManager
                 referralFlag: referralFlag,
                 referralReason: referralReason,
                 advisoryResponseJson: advisoryResponseJson,
+                closedAt: closedAt,
+                resolutionNote: resolutionNote,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

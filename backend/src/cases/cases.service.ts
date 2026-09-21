@@ -33,6 +33,8 @@ export class CasesService {
           referralFlag: c.referralFlag,
           referralReason: c.referralReason,
           advisoryResponse: (c.advisoryResponse as any) ?? undefined,
+          closedAt: c.closedAt ? new Date(c.closedAt) : undefined,
+          resolutionNote: c.resolutionNote,
         },
         update: {
           caseType: c.caseType,
@@ -42,6 +44,8 @@ export class CasesService {
           location: c.location,
           referralFlag: c.referralFlag,
           referralReason: c.referralReason,
+          closedAt: c.closedAt ? new Date(c.closedAt) : null,
+          resolutionNote: c.resolutionNote,
           syncedAt,
         },
       });
@@ -70,6 +74,8 @@ export class CasesService {
         referralFlag: c.referralFlag,
         referralReason: c.referralReason,
         advisoryResponse: c.advisoryResponse,
+        closedAt: c.closedAt ? c.closedAt.toISOString() : null,
+        resolutionNote: c.resolutionNote,
       })),
     };
   }
@@ -173,6 +179,8 @@ export class CasesService {
         createdAt: c.createdAt.toISOString(),
         referralFlag: c.referralFlag,
         referralReason: c.referralReason,
+        closedAt: c.closedAt ? c.closedAt.toISOString() : null,
+        resolutionNote: c.resolutionNote,
         mediatorName: mediator?.fullName ?? 'Unknown mediator',
         region: mediator?.region ?? 'Unknown region',
         locality: mediator?.locality ?? 'Unknown locality',

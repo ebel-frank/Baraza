@@ -31,9 +31,16 @@ class AdminCaseDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _ReferralPill(),
               ),
-            Text(
-              caseData.caseType,
-              style: Theme.of(context).textTheme.headlineSmall,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    caseData.caseType,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                _StatusPill(closed: caseData.closedAt != null),
+              ],
             ),
             const SizedBox(height: 6),
             Wrap(
@@ -95,7 +102,77 @@ class AdminCaseDetailScreen extends StatelessWidget {
                 ),
               ),
             ],
+            if (caseData.closedAt != null) ...[
+              const SizedBox(height: 20),
+              Text('Resolved', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: RiskColors.of(context, 'low').bg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat.yMMMd().format(
+                        DateTime.parse(caseData.closedAt!),
+                      ),
+                      style: TextStyle(
+                        color: RiskColors.of(context, 'low').fg,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                    if (caseData.resolutionNote != null &&
+                        caseData.resolutionNote!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        caseData.resolutionNote!,
+                        style: TextStyle(
+                          color: RiskColors.of(context, 'low').fg,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final bool closed;
+  const _StatusPill({required this.closed});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = closed
+        ? RiskColors.of(context, 'low').fg
+        : scheme.onSurfaceVariant;
+    final bg = closed
+        ? RiskColors.of(context, 'low').bg
+        : scheme.surfaceContainerHighest;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        closed ? 'Closed' : 'Open',
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

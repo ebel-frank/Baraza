@@ -34,6 +34,14 @@ export class CasePayloadDto {
 
   @IsOptional()
   advisoryResponse?: unknown;
+
+  @IsOptional()
+  @IsDateString()
+  closedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  resolutionNote?: string;
 }
 
 export class SyncPushDto {

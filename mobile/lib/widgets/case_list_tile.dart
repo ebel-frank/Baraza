@@ -18,6 +18,7 @@ class CaseListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final synced = caseRecord.syncedAt != null;
+    final closed = caseRecord.closedAt != null;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -62,6 +63,7 @@ class CaseListTile extends StatelessWidget {
                       Wrap(
                         spacing: 14,
                         runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           _MetaItem(
                             icon: Icons.place_outlined,
@@ -73,6 +75,7 @@ class CaseListTile extends StatelessWidget {
                               caseRecord.createdAt,
                             ),
                           ),
+                          if (closed) _ClosedBadge(),
                         ],
                       ),
                     ],
@@ -122,6 +125,21 @@ class _SyncBadge extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ClosedBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final risk = RiskColors.of(context, 'low');
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(color: risk.bg, borderRadius: BorderRadius.circular(100)),
+      child: Text(
+        'Closed',
+        style: TextStyle(color: risk.fg, fontSize: 11.5, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }
