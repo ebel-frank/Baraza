@@ -144,9 +144,12 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 if (caseRecord.referralFlag)
-                  ReferralBanner(
-                    reason: caseRecord.referralReason,
-                    suggestedNextStep: advisory?.referralNote,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ReferralBanner(
+                      reason: caseRecord.referralReason,
+                      suggestedNextStep: advisory?.referralNote,
+                    ),
                   ),
                 Text(
                   caseRecord.caseType,

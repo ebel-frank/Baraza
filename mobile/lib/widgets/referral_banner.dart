@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 
+/// Compact "may need referral" pill. Kept deliberately short — the reason and
+/// suggested next step already appear in full on the Guidance screen.
 class ReferralBanner extends StatelessWidget {
   final String? reason;
   final String? suggestedNextStep;
@@ -12,54 +14,22 @@ class ReferralBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final risk = RiskColors.of(context, 'high');
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: risk.bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(100),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.flag_rounded, color: risk.fg, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'This case may be outside mediation’s normal scope',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: risk.fg,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (reason != null) ...[
-            const SizedBox(height: 8),
-            Text(reason!, style: TextStyle(color: risk.fg, height: 1.4)),
-          ],
-          if (suggestedNextStep != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Suggested next step: $suggestedNextStep',
-              style: TextStyle(
-                color: risk.fg,
-                fontStyle: FontStyle.italic,
-                height: 1.4,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
+          Icon(Icons.flag_rounded, color: risk.fg, size: 15),
+          const SizedBox(width: 6),
           Text(
-            'This is a prompt to consider referral, not a diagnosis. Use your judgement.',
+            'May need referral',
             style: TextStyle(
-              fontSize: 12,
-              color: risk.fg.withValues(alpha: 0.75),
+              color: risk.fg,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
         ],
