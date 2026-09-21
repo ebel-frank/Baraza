@@ -174,6 +174,26 @@ async function seedExampleCases(prisma: PrismaClient) {
       referralFlag: true,
       referralReason: 'Repeat dispute between the same parties. Mediation is not resolving the underlying issue.',
     },
+    {
+      id: 'demo-case-4',
+      caseType: 'Neighbor dispute',
+      parties: [{ role: 'Complainant' }, { role: 'Neighbor family' }],
+      description:
+        'Two households have disputed access to grazing land for over two years. The complainant says that during a confrontation at the disputed boundary last week, the neighbor\'s son struck the complainant\'s brother with a farm tool, and the brother later died from his injuries at the general hospital. The complainant came to the mediator to have the land dispute\'s history formally recorded for the police investigation, not for further mediation, since a death is now involved. The mediator explained that this matter cannot be mediated and must go directly to police.',
+      location: 'Katsina, Nigeria',
+      referralFlag: true,
+      referralReason: 'A death resulted from the underlying dispute. Refer directly to police, do not continue mediation.',
+    },
+    {
+      id: 'demo-case-5',
+      caseType: 'Other',
+      parties: [{ role: 'Complainant' }, { role: 'Accused' }],
+      description:
+        'A young woman reported that a man from a neighboring compound raped her while she was returning from the market in the evening. She approached the mediator because the two families have an ongoing land dispute the mediator was already handling, and she was unsure where else to report it at the time. The mediator did not discuss the incident further and directed her immediately to the nearest police station and a health facility for care, noting that a criminal matter of this kind is entirely outside mediation\'s scope.',
+      location: 'Sokoto, Nigeria',
+      referralFlag: true,
+      referralReason: 'Alleged rape. Criminal matter, refer immediately to police, mediation does not apply.',
+    },
   ];
 
   for (const ex of examples) {
