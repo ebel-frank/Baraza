@@ -224,22 +224,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Center(
-                              child: TextButton(
-                                onPressed: _saving
-                                    ? null
-                                    : () {
-                                        _usernameController.text =
-                                            kAdminUsername;
-                                        _passwordController.text =
-                                            kAdminPassword;
-                                      },
-                                child: const Text(
-                                  'Signing in as the overseeing institution? Use the admin demo account',
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
