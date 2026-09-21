@@ -64,8 +64,14 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
             'never-synced cases cannot be recovered.',
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Sync now')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Sync now'),
+            ),
           ],
         ),
       );
@@ -85,8 +91,14 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
           'will come back the next time you sign in, on this or another device.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Sign out')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign out'),
+          ),
         ],
       ),
     );
@@ -96,7 +108,9 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     await widget.services.authSessionService.clearSession();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => SignInScreen(services: widget.services)),
+      MaterialPageRoute(
+        builder: (_) => SignInScreen(services: widget.services),
+      ),
       (route) => false,
     );
   }
@@ -105,49 +119,64 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sync status')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _lastSyncedAt == null
-                          ? 'Never synced'
-                          : 'Last synced: ${DateFormat.yMMMd().add_jm().format(_lastSyncedAt!)}',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text('$_pendingCount case(s) pending sync'),
-                  ],
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _lastSyncedAt == null
+                            ? 'Never synced'
+                            : 'Last synced: ${DateFormat.yMMMd().add_jm().format(_lastSyncedAt!)}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text('$_pendingCount case(s) pending sync'),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _syncing ? null : _syncNow,
-              icon: _syncing
-                  ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.sync),
-              label: const Text('Sync now'),
-            ),
-            if (_lastMessage != null)
-              Padding(padding: const EdgeInsets.only(top: 12), child: Text(_lastMessage!)),
-            const SizedBox(height: 32),
-            const Divider(),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _signOut,
-              icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Sign out', style: TextStyle(color: Colors.red)),
-              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
-            ),
-          ],
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _syncing ? null : _syncNow,
+                icon: _syncing
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync),
+                label: const Text('Sync now'),
+              ),
+              if (_lastMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(_lastMessage!),
+                ),
+              const SizedBox(height: 32),
+              const Divider(),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _signOut,
+                icon: const Icon(Icons.logout, color: Colors.red),
+                label: const Text(
+                  'Sign out',
+                  style: TextStyle(color: Colors.red),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

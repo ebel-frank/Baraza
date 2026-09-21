@@ -53,8 +53,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       builder: (_) => AlertDialog(
         title: const Text('Sign out?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Sign out')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign out'),
+          ),
         ],
       ),
     );
@@ -63,7 +69,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     await widget.services.authSessionService.clearSession();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => SignInScreen(services: widget.services)),
+      MaterialPageRoute(
+        builder: (_) => SignInScreen(services: widget.services),
+      ),
       (route) => false,
     );
   }
@@ -87,7 +95,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: _buildBody(context),
+      body: SafeArea(top: false, child: _buildBody(context)),
     );
   }
 
@@ -101,9 +109,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.cloud_off_rounded, size: 40, color: Theme.of(context).colorScheme.outline),
+              Icon(
+                Icons.cloud_off_rounded,
+                size: 40,
+                color: Theme.of(context).colorScheme.outline,
+              ),
               const SizedBox(height: 12),
-              Text(_error!, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 16),
               FilledButton(onPressed: _load, child: const Text('Retry')),
             ],
@@ -118,13 +134,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text('No cases logged yet.', style: Theme.of(context).textTheme.bodyLarge),
+          child: Text(
+            'No cases logged yet.',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
       );
     }
 
-    final visibleCases =
-        _regionFilter == null ? overview.cases : overview.cases.where((c) => c.region == _regionFilter).toList();
+    final visibleCases = _regionFilter == null
+        ? overview.cases
+        : overview.cases.where((c) => c.region == _regionFilter).toList();
     final referredTotal = overview.cases.where((c) => c.referralFlag).length;
 
     return RefreshIndicator(
@@ -136,11 +156,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _StatTile(label: 'Total cases', value: '${overview.cases.length}', icon: Icons.folder_open_rounded)),
+              Expanded(
+                child: _StatTile(
+                  label: 'Total cases',
+                  value: '${overview.cases.length}',
+                  icon: Icons.folder_open_rounded,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _StatTile(label: 'Referred', value: '$referredTotal', icon: Icons.priority_high_rounded, emphasize: referredTotal > 0)),
+              Expanded(
+                child: _StatTile(
+                  label: 'Referred',
+                  value: '$referredTotal',
+                  icon: Icons.priority_high_rounded,
+                  emphasize: referredTotal > 0,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _StatTile(label: 'Regions', value: '${overview.regions.length}', icon: Icons.map_outlined)),
+              Expanded(
+                child: _StatTile(
+                  label: 'Regions',
+                  value: '${overview.regions.length}',
+                  icon: Icons.map_outlined,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -174,7 +213,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Cases (${visibleCases.length})', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Cases (${visibleCases.length})',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 10),
           for (final c in visibleCases) ...[
             _AdminCaseCard(caseData: c),
@@ -212,7 +254,9 @@ class _SubtitleBanner extends StatelessWidget {
           Expanded(
             child: Text(
               'Full case detail across $regionCount Nigerian states, for the overseeing institution.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
             ),
           ),
         ],
@@ -227,7 +271,12 @@ class _StatTile extends StatelessWidget {
   final IconData icon;
   final bool emphasize;
 
-  const _StatTile({required this.label, required this.value, required this.icon, this.emphasize = false});
+  const _StatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.emphasize = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +290,14 @@ class _StatTile extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: scheme.onSurfaceVariant),
             const SizedBox(height: 10),
-            Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: valueColor)),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: valueColor,
+              ),
+            ),
             const SizedBox(height: 2),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
@@ -279,8 +335,14 @@ class _RegionCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
-          border: Border.all(color: selected ? scheme.primary : scheme.outlineVariant.withValues(alpha: 0.6)),
+          color: selected
+              ? scheme.primaryContainer
+              : scheme.surfaceContainerLow,
+          border: Border.all(
+            color: selected
+                ? scheme.primary
+                : scheme.outlineVariant.withValues(alpha: 0.6),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,11 +359,21 @@ class _RegionCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: selected ? scheme.onPrimaryContainer : scheme.onSurface,
+                      color: selected
+                          ? scheme.onPrimaryContainer
+                          : scheme.onSurface,
                     ),
                   ),
                 ),
-                if (risk != null) Container(width: 8, height: 8, decoration: BoxDecoration(color: risk.fg, shape: BoxShape.circle)),
+                if (risk != null)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: risk.fg,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
               ],
             ),
             Text(
@@ -334,7 +406,12 @@ class _AdminCaseCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(width: 4, color: caseData.referralFlag ? BarazaTheme.danger : Colors.transparent),
+            Container(
+              width: 4,
+              color: caseData.referralFlag
+                  ? BarazaTheme.danger
+                  : Colors.transparent,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(14),
@@ -344,24 +421,41 @@ class _AdminCaseCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(caseData.caseType, style: Theme.of(context).textTheme.titleSmall),
+                          child: Text(
+                            caseData.caseType,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                         ),
                         if (caseData.referralFlag) _ReferredBadge(),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text(caseData.description, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      caseData.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 14,
                       runSpacing: 6,
                       children: [
-                        _MetaItem(icon: Icons.place_outlined, text: '${caseData.locality}, ${caseData.region}'),
-                        _MetaItem(icon: Icons.person_outline, text: caseData.mediatorName),
-                        if (date != null) _MetaItem(icon: Icons.event_outlined, text: DateFormat.yMMMd().format(date)),
+                        _MetaItem(
+                          icon: Icons.place_outlined,
+                          text: '${caseData.locality}, ${caseData.region}',
+                        ),
+                        _MetaItem(
+                          icon: Icons.person_outline,
+                          text: caseData.mediatorName,
+                        ),
+                        if (date != null)
+                          _MetaItem(
+                            icon: Icons.event_outlined,
+                            text: DateFormat.yMMMd().format(date),
+                          ),
                       ],
                     ),
-                    if (caseData.referralFlag && caseData.referralReason != null) ...[
+                    if (caseData.referralFlag &&
+                        caseData.referralReason != null) ...[
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(10),
@@ -371,7 +465,11 @@ class _AdminCaseCard extends StatelessWidget {
                         ),
                         child: Text(
                           caseData.referralReason!,
-                          style: TextStyle(color: RiskColors.of(context, 'high').fg, fontSize: 12.5, height: 1.3),
+                          style: TextStyle(
+                            color: RiskColors.of(context, 'high').fg,
+                            fontSize: 12.5,
+                            height: 1.3,
+                          ),
                         ),
                       ),
                     ],
@@ -392,8 +490,18 @@ class _ReferredBadge extends StatelessWidget {
     final risk = RiskColors.of(context, 'high');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(color: risk.bg, borderRadius: BorderRadius.circular(100)),
-      child: Text('Referred', style: TextStyle(color: risk.fg, fontSize: 11.5, fontWeight: FontWeight.w700)),
+      decoration: BoxDecoration(
+        color: risk.bg,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        'Referred',
+        style: TextStyle(
+          color: risk.fg,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
@@ -412,7 +520,10 @@ class _MetaItem extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: scheme.onSurfaceVariant),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12)),
+        Text(
+          text,
+          style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+        ),
       ],
     );
   }
