@@ -114,9 +114,14 @@ not verbatim statutory text. Swap them for the real excerpts before relying on
 this for anything beyond the demo.
 
 Quick checks (`/sync/*` and `/advisory/query` need a Bearer token from
-`/auth/login`; `/referral/categories` doesn't):
+`/auth/login`; `/health` and `/referral/categories` don't):
 
 ```bash
+# GET /health — confirms the backend is up AND can actually reach the database
+# (not just that the Node process is alive). No auth needed; safe to poll from
+# anywhere, e.g. https://baraza.onrender.com/health once deployed.
+curl http://localhost:3000/health
+
 curl http://localhost:3000/referral/categories
 
 TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
@@ -141,7 +146,9 @@ connection string (Atlas or otherwise; this repo doesn't assume which).
 1. Push this repo to GitHub (Render deploys from a connected git repo).
 2. In the Render dashboard: **New > Web Service**, connect the repo, set
    **Root Directory** to `backend`, and **Environment** to **Docker** (Render
-   picks up `backend/Dockerfile` automatically).
+   picks up `backend/Dockerfile` automatically). Set **Health Check Path** to
+   `/health` — Render polls this to confirm a deploy is actually healthy
+   (including that it can reach MongoDB), not just that the process started.
 3. Set these environment variables on the service:
    - `DATABASE_URL` — your MongoDB connection string (must resolve to a
      replica set, as above)
