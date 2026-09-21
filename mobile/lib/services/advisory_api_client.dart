@@ -119,7 +119,11 @@ class AdvisoryApiClient {
         ));
       }
 
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 45));
+      // Generous timeout: the backend retries Gemini up to 3 times with
+      // exponential backoff on transient 503s (see GeminiClient), which can
+      // add up to ~40s worst case even before a successful attempt's own
+      // call time — 45s was cutting it too close.
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 90));
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode != 200 && response.statusCode != 201) {
