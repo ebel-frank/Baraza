@@ -4,10 +4,14 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AdminGuard, JwtAuthGuard } from './jwt-auth.guard';
 
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET is not set. Copy .env.example to .env and set a long random string before starting the backend.',
+  );
+}
+
 const jwtModule = JwtModule.register({
-  // Demo-only fallback secret — set a real JWT_SECRET in .env before anything
-  // beyond this hackathon demo.
-  secret: process.env.JWT_SECRET ?? 'dev-only-insecure-secret-change-me',
+  secret: process.env.JWT_SECRET,
   signOptions: { expiresIn: '90d' },
 });
 

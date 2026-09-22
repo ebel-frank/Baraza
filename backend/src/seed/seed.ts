@@ -5,14 +5,25 @@ import * as bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { GeminiClient } from '../gemini/gemini-client';
 
-// Demo account credentials — see README for the sign-in demo flow.
+// Demo account credentials — see README for the sign-in demo flow. Passwords
+// come from the environment, not the source tree, so they're never committed.
 const DEMO_USERNAME = 'demo';
-const DEMO_PASSWORD = 'password123';
+const DEMO_PASSWORD = requireEnv('DEMO_PASSWORD');
 
 // Overseeing-institution admin account — sees unanonymized case data, gated
 // by the admin dashboard on the mobile app. Not self-registerable.
 const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = requireEnv('ADMIN_PASSWORD');
+
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `${name} is not set. Copy .env.example to .env and set it before running the seed script.`,
+    );
+  }
+  return value;
+}
 
 interface ParsedDoc {
   id: string;
@@ -292,7 +303,9 @@ async function seedExampleCases(prisma: PrismaClient) {
  * the "recent" escalation signal. Confined to Nigeria only — see README.
  */
 async function seedDashboardDemoData(prisma: PrismaClient) {
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // Not meant to be signed into — only exists to give the admin dashboard a
+  // realistic geographic spread, so it reuses the demo account's password.
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 
   const mediators = [

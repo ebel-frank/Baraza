@@ -76,7 +76,10 @@ mobile/    Flutter (Android) app — Drift/SQLite local storage, offline-first
 ```bash
 cd backend
 cp .env.example .env
-# edit .env: set GEMINI_API_KEY to your real key, and JWT_SECRET to any random string.
+# edit .env: set GEMINI_API_KEY to your real key, JWT_SECRET to any random
+# string, and DEMO_PASSWORD / ADMIN_PASSWORD to whatever you want the seeded
+# demo and admin accounts to log in with (the backend won't start without
+# JWT_SECRET, and `npm run seed` won't run without the other two).
 # Leave DATABASE_URL as the mongodb://mongo:27017/... default to use the bundled
 # local Mongo container, or point it at your own connection string instead.
 docker compose up -d --build
@@ -109,9 +112,9 @@ docker compose exec backend npm run seed
 The seed script chunks each document by section, calls Gemini to embed every
 chunk, and stores each chunk (including its embedding, as a plain float
 array — see "Architecture notes" below) via Prisma. It also creates a demo
-account (username `demo`, password `password123`) with 3 example cases —
-separate from the on-device demo cases the mobile app seeds locally when you
-register a new account.
+account (username `demo`, password whatever you set `DEMO_PASSWORD` to in
+`.env`) with 3 example cases — separate from the on-device demo cases the
+mobile app seeds locally when you register a new account.
 
 **Note:** `backend/seed_data/*.txt` are short, clearly-labeled **placeholder**
 excerpts written for this demo (see the disclaimer at the top of each file) —
@@ -131,7 +134,7 @@ curl http://localhost:3000/referral/categories
 
 TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "demo", "password": "password123"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+  -d '{"username": "demo", "password": "'"$DEMO_PASSWORD"'"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
 
 curl -X POST http://localhost:3000/advisory/query \
   -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
@@ -161,7 +164,11 @@ connection string (Atlas or otherwise; this repo doesn't assume which).
    - `GEMINI_EMBEDDING_MODEL` — `gemini-embedding-001` (or current equivalent)
    - `GEMINI_GENERATION_MODEL` — `gemini-2.5-flash` (pinned; avoid `-latest`
      aliases — see "Prerequisites" above)
-   - `JWT_SECRET` — a long random string
+   - `JWT_SECRET` — a long random string. Required: the backend refuses to
+     start without it, rather than falling back to a known default.
+   - `DEMO_PASSWORD`, `ADMIN_PASSWORD` — whatever you want the seeded demo
+     and admin accounts to log in with. Only needed for the seed step below,
+     not for the server to start.
    - Leave `PORT` unset — Render injects its own and `main.ts` already reads
      `process.env.PORT`
 4. Deploy. Render builds the Dockerfile and runs its default `CMD` (`node
@@ -180,7 +187,8 @@ connection string (Atlas or otherwise; this repo doesn't assume which).
    pointed at the same database:
    ```bash
    cd backend
-   DATABASE_URL="<your Render DATABASE_URL value>" GEMINI_API_KEY="<your key>" npm run seed
+   DATABASE_URL="<your Render DATABASE_URL value>" GEMINI_API_KEY="<your key>" \
+     DEMO_PASSWORD="<pick one>" ADMIN_PASSWORD="<pick one>" npm run seed
    ```
 6. The backend URL is fixed in the app (not user-configurable — see
    `mobile/lib/services/backend_config.dart`). If you deploy to a different
@@ -196,6 +204,9 @@ request after a while will be slow (cold start) while it wakes back up.
 cd mobile
 flutter pub get
 flutter run   # pick your emulator/device
+# Optionally pre-fill the demo password on the Sign In screen (matching
+# whatever DEMO_PASSWORD you set on the backend when seeding):
+# flutter run --dart-define=DEMO_PASSWORD=<same value as backend DEMO_PASSWORD>
 ```
 
 The app's backend URL is fixed at build time (not user-configurable in the
@@ -214,10 +225,11 @@ First launch shows a **Sign In** screen. Either:
 - Tap **Register** and create a new account (username, password, full name,
   country, region, locality) — the app then seeds 3 example cases locally so
   there's something to look at immediately, or
-- Sign in with the seeded demo account: username `demo`, password
-  `password123` (after running `docker compose exec backend npm run seed`) —
-  the Sign In screen is pre-filled with these, so it's just a tap once you've
-  hosted and seeded a backend. This pulls that account's 3 example cases down.
+- Sign in with the seeded demo account: username `demo`, password whatever
+  you set `DEMO_PASSWORD` to when seeding. The username is pre-filled; the
+  password is too if you built with `--dart-define=DEMO_PASSWORD=...` (see
+  above), otherwise type it once. This pulls that account's 3 example cases
+  down.
 
 Registering and signing in need connectivity; logging cases afterward works
 fully offline.
